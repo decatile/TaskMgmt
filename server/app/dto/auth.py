@@ -36,7 +36,7 @@ Password = Annotated[str, AfterValidator(validate_password)]
 
 
 class LoginRequest(BaseModel):
-    username: Username
+    email: Email
     password: Password
 
 

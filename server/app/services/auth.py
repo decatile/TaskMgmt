@@ -25,7 +25,7 @@ class AbstractAuthService(ABC):
     class EmailExists(Exception): ...
 
     @abstractmethod
-    async def login(self, username: str, password: str) -> TokenSet: ...
+    async def login(self, email: str, password: str) -> TokenSet: ...
 
     @abstractmethod
     async def register(cls, email: str, username: str, password: str) -> TokenSet: ...
@@ -53,8 +53,8 @@ class DefaultAuthService(AbstractAuthService):
             refresh_token_expires_in=refresh.expires_in,
         )
 
-    async def login(self, username: str, password: str) -> TokenSet:
-        user = await self.user_repo.find_by_username(username)
+    async def login(self, email: str, password: str) -> TokenSet:
+        user = await self.user_repo.find_by_email(email)
         if user is None:
             raise AbstractAuthService.UserNotFound
         if not validate_password(user.password_hash, password):

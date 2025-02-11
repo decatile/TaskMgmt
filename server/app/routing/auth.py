@@ -14,7 +14,7 @@ async def login(
     auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
 ) -> TokenSet:
     try:
-        token_set = await auth_service.login(form.username, form.password)
+        token_set = await auth_service.login(form.email, form.password)
     except AbstractAuthService.UserNotFound:
         raise HTTPException(400, "User not found")
     except AbstractAuthService.InvalidPassword:
