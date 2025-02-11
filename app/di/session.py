@@ -1,8 +1,17 @@
-from os import environ
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 
-engine = create_async_engine(environ["DATABASE_URL"])
+from app.config.database import DatabaseConfig
+from app.di.database_config import get_database_config
+
+engine: AsyncEngine | None = None
 
 
-def get_session() -> AsyncSession:
+def get_session(
+    config: Annotated[DatabaseConfig, Depends(get_database_config)],
+) -> AsyncSession:
+    global engine
+    if engine is None:
+        engine = create_async_engine(config.url)
     return AsyncSession(engine)
