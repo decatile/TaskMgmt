@@ -46,9 +46,11 @@ class DefaultJwtService(AbstractJwtService):
     def from_string(self, value: str) -> JwtObject | None:
         try:
             obj = jwt.decode(
-                value, self.config.access_token_secret_key, ["HS256"], verify=True
+                value,
+                self.config.access_token_secret_key,
+                ["HS256"],
+                verify=True,
             )
-            print(obj)
             return JwtObject(user_id=int(obj["sub"]))
         except:  # noqa: E722
             return None

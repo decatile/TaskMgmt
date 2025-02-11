@@ -44,7 +44,7 @@ class DatabaseUserRepo(AbstractUserRepo):
         user = cast(
             User | None,
             await self.session.scalar(
-                select(User).where(User.email == email or User.username == username)
+                select(User).where((User.email == email) | (User.username == username))
             ),
         )
         if user is None:

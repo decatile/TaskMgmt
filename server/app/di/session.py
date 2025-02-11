@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 
@@ -8,10 +8,11 @@ from app.di.database_config import get_database_config
 engine: AsyncEngine | None = None
 
 
-def get_session(
+async def get_session(
     config: Annotated[DatabaseConfig, Depends(get_database_config)],
-) -> AsyncSession:
+) -> AsyncGenerator[AsyncSession]:
     global engine
     if engine is None:
         engine = create_async_engine(config.url)
-    return AsyncSession(engine)
+    async with AsyncSession(engine) as session, session.begin():
+        yield session
