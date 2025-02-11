@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 
 from pydantic import BaseModel
 
@@ -24,11 +25,16 @@ class AbstractAuthService(ABC):
 
     class EmailExists(Exception): ...
 
+    class InvalidRefreshToken(Exception): ...
+
     @abstractmethod
     async def login(self, email: str, password: str) -> TokenSet: ...
 
     @abstractmethod
-    async def register(cls, email: str, username: str, password: str) -> TokenSet: ...
+    async def register(self, email: str, username: str, password: str) -> TokenSet: ...
+
+    @abstractmethod
+    async def refresh(self, refresh_token: str) -> TokenSet: ...
 
 
 class DefaultAuthService(AbstractAuthService):
@@ -69,3 +75,12 @@ class DefaultAuthService(AbstractAuthService):
                 raise AbstractAuthService.UsernameExists
         user = await self.user_repo.commit_new(email, username, password)
         return await self._generate_jwt_set(user.id)
+
+    async def refresh(self, refresh_token: str) -> TokenSet:
+        token = await self.refresh_token_repo.find_by_id(refresh_token)
+        if token is None:
+            raise AbstractAuthService.InvalidRefreshToken
+        if (token.created_at + timedelta(seconds=token.expires_in)) < datetime.now():
+            await self.refresh_token_repo.commit_del(token)
+            raise AbstractAuthService.InvalidRefreshToken
+        return await self._generate_jwt_set(token.user_id)

@@ -13,6 +13,9 @@ class AbstractRefreshTokenRepo(ABC):
     @abstractmethod
     async def commit_new(self, user_id: int) -> RefreshToken: ...
 
+    @abstractmethod
+    async def commit_del(self, token: RefreshToken) -> None: ...
+
 
 class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
     def __init__(self, session: AsyncSession, config: TokenConfig):
@@ -33,3 +36,6 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
         self.session.add(token)
         await self.session.flush()
         return token
+
+    async def commit_del(self, token: RefreshToken) -> None:
+        await self.session.delete(token)
