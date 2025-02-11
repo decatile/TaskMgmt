@@ -2,7 +2,7 @@ from typing import cast
 from abc import ABC, abstractmethod
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.dal.models.user import User
+from app.dal.models import User
 
 
 class AbstractUserRepo(ABC):

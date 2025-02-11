@@ -3,7 +3,7 @@ from typing import cast
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config.token import TokenConfig
-from app.dal.models.refresh_token import RefreshToken
+from app.dal.models import RefreshToken
 
 
 class AbstractRefreshTokenRepo(ABC):
