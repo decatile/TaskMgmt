@@ -1,20 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from app.di.auth_service import get_auth_service
+from app.dto.auth import LoginRequest, RegisterRequest
 from app.services.auth import AbstractAuthService, TokenSet
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    access_token_expires_in: int
-    refresh_token: str
-    refresh_token_expires_in: int
 
 
 auth_router = APIRouter()
@@ -31,4 +19,20 @@ async def login(
         raise HTTPException(400, "User not found")
     except AbstractAuthService.InvalidPassword:
         raise HTTPException(400, "Invalid password")
+    return token_set
+
+
+@auth_router.post("/register")
+async def register(
+    form: RegisterRequest,
+    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+) -> TokenSet:
+    try:
+        token_set = await auth_service.register(
+            form.email, form.username, form.password
+        )
+    except AbstractAuthService.EmailExists:
+        raise HTTPException(400, "User with associated email already exist")
+    except AbstractAuthService.UsernameExists:
+        raise HTTPException(400, "User with associated username already exist")
     return token_set

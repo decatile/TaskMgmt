@@ -20,8 +20,15 @@ class AbstractAuthService(ABC):
 
     class InvalidPassword(Exception): ...
 
+    class UsernameExists(Exception): ...
+
+    class EmailExists(Exception): ...
+
     @abstractmethod
     async def login(self, username: str, password: str) -> TokenSet: ...
+
+    @abstractmethod
+    async def register(cls, email: str, username: str, password: str) -> TokenSet: ...
 
 
 class DefaultAuthService(AbstractAuthService):
@@ -36,17 +43,29 @@ class DefaultAuthService(AbstractAuthService):
         self.refresh_token_repo = refresh_token_repo
         self.jwt_service = jwt_service
 
-    async def login(self, username: str, password: str) -> TokenSet:
-        user = await self.user_repo.find_by_username(username)
-        if user is None:
-            raise AbstractAuthService.UserNotFound
-        if not validate_password(user.password_hash, password):
-            raise AbstractAuthService.InvalidPassword
-        jwt = self.jwt_service.new(user.id)
-        refresh = await self.refresh_token_repo.commit_new(user.id)
+    async def _generate_jwt_set(self, user_id: int) -> TokenSet:
+        jwt = self.jwt_service.new(user_id)
+        refresh = await self.refresh_token_repo.commit_new(user_id)
         return TokenSet(
             access_token=jwt.string,
             refresh_token=refresh.id,
             access_token_expires_in=jwt.expires_in,
             refresh_token_expires_in=refresh.expires_in,
         )
+
+    async def login(self, username: str, password: str) -> TokenSet:
+        user = await self.user_repo.find_by_username(username)
+        if user is None:
+            raise AbstractAuthService.UserNotFound
+        if not validate_password(user.password_hash, password):
+            raise AbstractAuthService.InvalidPassword
+        return await self._generate_jwt_set(user.id)
+
+    async def register(self, email: str, username: str, password: str) -> TokenSet:
+        match await self.user_repo.lookup_by_email_or_username(email, username):
+            case "email":
+                raise AbstractAuthService.EmailExists
+            case "username":
+                raise AbstractAuthService.UsernameExists
+        user = await self.user_repo.commit_new(email, username, password)
+        return await self._generate_jwt_set(user.id)
