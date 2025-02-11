@@ -1,7 +1,9 @@
 from typing import Annotated
+from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
-import re
 from email_validator import validate_email as validate_email_raw
+from app.services.auth import TokenSet
+import re
 
 
 def validate_email(value: str) -> str:
@@ -45,3 +47,20 @@ class RegisterRequest(BaseModel):
     email: Email
     username: Username
     password: Password
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    expires_in: int
+
+
+def response_from_set(value: TokenSet) -> JSONResponse:
+    return JSONResponse(
+        {
+            "access_token": value.access_token,
+            "expires_in": value.access_token_expires_in,
+        },
+        headers={
+            "Set-Cookie": f"refresh_token={value.refresh_token};max-age={value.refresh_token_expires_in};path=/auth/refresh"
+        },
+    )

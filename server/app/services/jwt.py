@@ -49,6 +49,6 @@ class DefaultJwtService(AbstractJwtService):
                 value, self.config.access_token_secret_key, ["HS256"], verify=True
             )
             print(obj)
-            return JwtObject(user_id=obj["sub"])
+            return JwtObject(user_id=int(obj["sub"]))
         except:  # noqa: E722
             return None

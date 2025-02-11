@@ -8,6 +8,9 @@ from app.utils.hash import hash_password
 
 class AbstractUserRepo(ABC):
     @abstractmethod
+    async def find_by_id(self, id: int) -> User | None: ...
+
+    @abstractmethod
     async def find_by_email(self, email: str) -> User | None: ...
 
     @abstractmethod
@@ -23,6 +26,11 @@ class DatabaseUserRepo(AbstractUserRepo):
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
+
+    async def find_by_id(self, id: int) -> User | None:
+        return cast(
+            User | None, await self.session.scalar(select(User).where(User.id == id))
+        )
 
     async def find_by_email(self, email: str) -> User | None:
         return cast(
