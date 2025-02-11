@@ -53,6 +53,8 @@ async def refresh(
         token_set = await auth_service.refresh(refresh_token)
     except AbstractAuthService.InvalidRefreshToken:
         raise HTTPException(
-            400, "Invalid refresh token", headers=refresh_token_cookie(token_set, -1)
+            400,
+            "Invalid refresh token",
+            headers=refresh_token_cookie(refresh_token, -1),
         )
     return response_from_set(token_set)

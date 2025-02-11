@@ -48,9 +48,9 @@ class RegisterRequest(BaseModel):
     password: Password
 
 
-def refresh_token_cookie(value: TokenSet, max_age: int | None = None) -> Dict[str, str]:
+def refresh_token_cookie(value: str, max_age: int) -> Dict[str, str]:
     return {
-        "Set-Cookie": f"refresh_token={value.refresh_token}; max-age={max_age or value.refresh_token_expires_in}; path=/auth/refresh"
+        "Set-Cookie": f"refresh_token={value}; max-age={max_age}; path=/auth/refresh"
     }
 
 
@@ -60,5 +60,7 @@ def response_from_set(value: TokenSet) -> JSONResponse:
             "access_token": value.access_token,
             "expires_in": value.access_token_expires_in,
         },
-        headers=refresh_token_cookie(value),
+        headers=refresh_token_cookie(
+            value.refresh_token, value.refresh_token_expires_in
+        ),
     )
