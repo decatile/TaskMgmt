@@ -7,26 +7,27 @@ from email_validator import validate_email as validate_email_raw
 def validate_email(value: str) -> str:
     try:
         validate_email_raw(value)
-    except:  # noqa: E722
-        raise ValueError("Invalid email")
+    except Exception as e:  # noqa: E722
+        print(e)
+        raise ValueError("invalid email")
     return value
 
 
 def validate_username(value: str) -> str:
     if len(value) > 64:
-        raise ValueError("Username must not be longer than 64 characters")
+        raise ValueError("username must not be longer than 64 characters")
     if re.fullmatch(r"[a-z][a-z0-9_]*[a-z0-9]", value, re.I) is None:
         raise ValueError(
-            "Username must to start with letter, then continue with letters, digits or underscores and end with letter or digit"
+            "username must to start with letter, then continue with letters, digits or underscores and end with letter or digit"
         )
     return value
 
 
 def validate_password(value: str) -> str:
     if len(value) < 8:
-        raise ValueError("Password must be longer than 7 characters")
+        raise ValueError("password must be longer than 7 characters")
     if len(value) > 64:
-        raise ValueError("Password must be shorter than 65 characters")
+        raise ValueError("password must be shorter than 65 characters")
     return value
 
 

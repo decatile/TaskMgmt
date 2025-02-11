@@ -1,0 +1,15 @@
+services:
+  server:
+    depends_on:
+      - db
+    build: ./server
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env.server-example
+  db:
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env.db-example

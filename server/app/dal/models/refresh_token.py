@@ -8,7 +8,7 @@ from .base import Base
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
-    id: Mapped[str] = mapped_column(UUID(), primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(UUID(), primary_key=True, default=uuid4)
     expires_in: Mapped[int] = mapped_column(Integer())
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped[User] = relationship()

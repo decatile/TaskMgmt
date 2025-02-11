@@ -31,5 +31,5 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
             expires_in=self.config.refresh_token_expires_in, user_id=user_id
         )
         self.session.add(token)
-        await self.session.commit()
+        await self.session.flush()
         return token

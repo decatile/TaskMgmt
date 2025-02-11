@@ -48,7 +48,7 @@ class DefaultAuthService(AbstractAuthService):
         refresh = await self.refresh_token_repo.commit_new(user_id)
         return TokenSet(
             access_token=jwt.string,
-            refresh_token=refresh.id,
+            refresh_token=str(refresh.id),
             access_token_expires_in=jwt.expires_in,
             refresh_token_expires_in=refresh.expires_in,
         )

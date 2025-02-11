@@ -48,5 +48,5 @@ class DatabaseUserRepo(AbstractUserRepo):
             email=email, username=username, password_hash=hash_password(password)
         )
         self.session.add(user)
-        await self.session.commit()
+        await self.session.flush()
         return user
