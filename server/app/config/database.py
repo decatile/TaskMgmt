@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from os import environ
+from pydantic import BaseModel
 
 
-@dataclass
-class DatabaseConfig:
+class DatabaseConfig(BaseModel):
     url: str
 
     @staticmethod
     def from_env() -> "DatabaseConfig":
-        return DatabaseConfig(environ["DATABASE_URL"])
+        return DatabaseConfig(url=environ["DATABASE_URL"])

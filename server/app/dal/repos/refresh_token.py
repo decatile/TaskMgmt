@@ -11,7 +11,7 @@ class AbstractRefreshTokenRepo(ABC):
     async def find_by_id(self, id: str) -> RefreshToken | None: ...
 
     @abstractmethod
-    async def new(self, user_id: int) -> RefreshToken: ...
+    async def commit_new(self, user_id: int) -> RefreshToken: ...
 
 
 class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
@@ -26,7 +26,7 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
             await self.session.scalar(select(RefreshToken.id == id)),
         )
 
-    async def new(self, user_id: int) -> RefreshToken:
+    async def commit_new(self, user_id: int) -> RefreshToken:
         token = RefreshToken(
             expires_in=self.config.refresh_token_expires_in, user_id=user_id
         )

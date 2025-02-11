@@ -1,11 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from app.dal.repos.refresh_token import AbstractRefreshTokenRepo
-from app.dal.repos.user import AbstractUserRepo
-from app.di.refresh_token_repo import get_refresh_token_repo
-from app.di.user_repo import get_user_repo
-from app.utils.hash import hash_password
+from app.di.auth_service import get_auth_service
+from app.services.auth import AbstractAuthService, TokenSet
 
 
 class LoginRequest(BaseModel):
@@ -26,15 +23,12 @@ auth_router = APIRouter()
 @auth_router.post("/login")
 async def login(
     form: LoginRequest,
-    user_repo: Annotated[AbstractUserRepo, Depends(get_user_repo)],
-    refresh_token_repo: Annotated[
-        AbstractRefreshTokenRepo, Depends(get_refresh_token_repo)
-    ],
-) -> TokenResponse:
-    user = await user_repo.find_by_username(form.username)
-    if user is None:
+    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+) -> TokenSet:
+    try:
+        token_set = await auth_service.login(form.username, form.password)
+    except AbstractAuthService.UserNotFound:
         raise HTTPException(400, "User not found")
-    if user.password_hash != hash_password(form.password):
+    except AbstractAuthService.InvalidPassword:
         raise HTTPException(400, "Invalid password")
-    _token = await refresh_token_repo.new(user.id)
-    raise NotImplementedError
+    return token_set
