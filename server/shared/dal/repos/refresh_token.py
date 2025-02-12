@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import cast
-from sqlalchemy import select
+from sqlalchemy import select, delete, func
+from datetime import timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from shared.settings import Settings
 from shared.dal.models import RefreshToken
@@ -15,6 +16,9 @@ class AbstractRefreshTokenRepo(ABC):
 
     @abstractmethod
     async def commit_del(self, token: RefreshToken) -> None: ...
+
+    @abstractmethod
+    async def remove_expired(self) -> int: ...
 
 
 class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
@@ -39,3 +43,15 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
 
     async def commit_del(self, token: RefreshToken) -> None:
         await self.session.delete(token)
+    
+    async def remove_expired(self) -> int:
+        result = await self.session.execute(
+            delete(RefreshToken).where(
+                (
+                    RefreshToken.created_at
+                    + timedelta(seconds=self.settings.refresh_token_expires_in)
+                )
+                < func.now()
+            )
+        )
+        return result.rowcount
