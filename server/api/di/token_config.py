@@ -1,4 +1,4 @@
-from app.config.token import TokenConfig
+from shared.config.token import TokenConfig
 
 
 config = TokenConfig.from_env()

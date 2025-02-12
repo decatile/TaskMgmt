@@ -1,14 +1,14 @@
 from typing import Annotated
 from fastapi import APIRouter, Cookie, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from app.di.auth_service import get_auth_service
-from app.dto.auth import (
+from api.di.auth_service import get_auth_service
+from api.dto.auth import (
     LoginRequest,
     RegisterRequest,
     refresh_token_cookie,
     response_from_set,
 )
-from app.services.auth import AbstractAuthService
+from api.services.auth import AbstractAuthService
 
 
 auth_router = APIRouter()

@@ -1,6 +1,2 @@
-*
-!pyproject.toml
-!poetry.lock
-!alembic.ini
-!/alembic
-!/app
+.*
+Dockerfile.*

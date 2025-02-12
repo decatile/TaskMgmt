@@ -1,4 +1,4 @@
-from app.config.database import DatabaseConfig
+from shared.config.database import DatabaseConfig
 
 
 config = DatabaseConfig.from_env()

@@ -2,11 +2,11 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.dal.models.user import User
-from app.dal.repos.user import AbstractUserRepo
-from app.di.jwt_service import get_jwt_service
-from app.di.user_repo import get_user_repo
-from app.services.jwt import AbstractJwtService
+from shared.dal.models.user import User
+from shared.dal.repos.user import AbstractUserRepo
+from api.di.jwt_service import get_jwt_service
+from api.di.user_repo import get_user_repo
+from api.services.jwt import AbstractJwtService
 
 
 async def get_current_user(

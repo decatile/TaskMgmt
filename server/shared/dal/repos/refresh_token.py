@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import cast
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.config.token import TokenConfig
-from app.dal.models import RefreshToken
+from shared.config.token import TokenConfig
+from shared.dal.models import RefreshToken
 
 
 class AbstractRefreshTokenRepo(ABC):

@@ -1,15 +1,31 @@
 services:
+  db:
+    image: postgres:latest
+    healthcheck:
+      test: /usr/bin/pg_isready -U postgres
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    env_file:
+      - .env.db-example
+  redis:
+    image: redis:latest
   server:
     depends_on:
-      - db
-    build: ./server
+      db:
+        condition: service_healthy
+    build:
+      context: server
+      dockerfile: Dockerfile.server
     ports:
       - '8000:8000'
     env_file:
       - .env.server-example
-  db:
-    image: postgres:latest
-    ports:
-      - '5432:5432'
+  server-worker:
+    depends_on:
+      - server
+    build:
+      context: server
+      dockerfile: Dockerfile.worker
     env_file:
-      - .env.db-example
+      - .env.server-example

@@ -2,8 +2,8 @@ from typing import Annotated, AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 
-from app.config.database import DatabaseConfig
-from app.di.database_config import get_database_config
+from shared.config.database import DatabaseConfig
+from api.di.database_config import get_database_config
 
 engine: AsyncEngine | None = None
 

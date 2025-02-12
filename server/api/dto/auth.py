@@ -2,7 +2,7 @@ from typing import Annotated, Dict
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
 from email_validator import validate_email as validate_email_raw
-from app.services.auth import TokenSet
+from api.services.auth import TokenSet
 import re
 
 

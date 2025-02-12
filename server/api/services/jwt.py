@@ -3,7 +3,7 @@ from datetime import datetime
 import jwt
 from pydantic import BaseModel
 
-from app.config.token import TokenConfig
+from shared.config.token import TokenConfig
 
 
 class JwtString(BaseModel):
@@ -17,7 +17,7 @@ class JwtObject(BaseModel):
 
 class AbstractJwtService(ABC):
     @abstractmethod
-    def new(self, user_id: int) -> JwtString: ...
+    def new(self, user_id: int) -> str: ...
 
     @abstractmethod
     def from_string(self, value: str) -> JwtObject | None: ...
@@ -28,19 +28,16 @@ class DefaultJwtService(AbstractJwtService):
         super().__init__()
         self.config = config
 
-    def new(self, user_id: int) -> JwtString:
+    def new(self, user_id: int) -> str:
         now = int(datetime.now().timestamp())
-        return JwtString(
-            string=jwt.encode(
-                {
-                    "sub": str(user_id),
-                    "iat": now,
-                    "exp": now + self.config.access_token_expires_in,
-                },
-                self.config.access_token_secret_key,
-                "HS256",
-            ),
-            expires_in=self.config.access_token_expires_in,
+        return jwt.encode(
+            {
+                "sub": str(user_id),
+                "iat": now,
+                "exp": now + self.config.access_token_expires_in,
+            },
+            self.config.access_token_secret_key,
+            "HS256",
         )
 
     def from_string(self, value: str) -> JwtObject | None:

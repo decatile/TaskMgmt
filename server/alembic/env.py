@@ -1,11 +1,11 @@
 import asyncio
 from os import environ
 from logging.config import fileConfig
-from app.dal.models import Base
+from shared.dal.models import Base
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-import alembic.context as context
+from alembic import context
 
 db_url = environ["DATABASE_URL"]
 
