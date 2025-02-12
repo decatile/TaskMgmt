@@ -7,7 +7,7 @@ from shared.dal.repos.refresh_token import AbstractRefreshTokenRepo
 from shared.dal.repos.user import AbstractUserRepo
 from api.services.jwt import AbstractJwtService
 from api.utils.hash import validate_password
-from shared.config.token import TokenConfig
+from shared.settings import Settings
 
 
 class TokenSet(BaseModel):
@@ -44,13 +44,13 @@ class DefaultAuthService(AbstractAuthService):
         user_repo: AbstractUserRepo,
         refresh_token_repo: AbstractRefreshTokenRepo,
         jwt_service: AbstractJwtService,
-        token_config: TokenConfig,
+        settings: Settings,
     ):
         super().__init__()
         self.user_repo = user_repo
         self.refresh_token_repo = refresh_token_repo
         self.jwt_service = jwt_service
-        self.token_config = token_config
+        self.settings = settings
 
     async def _generate_jwt_set(self, user_id: int) -> TokenSet:
         jwt = self.jwt_service.new(user_id)
@@ -58,8 +58,8 @@ class DefaultAuthService(AbstractAuthService):
         return TokenSet(
             access_token=jwt,
             refresh_token=str(refresh.id),
-            access_token_expires_in=self.token_config.access_token_expires_in,
-            refresh_token_expires_in=self.token_config.refresh_token_expires_in,
+            access_token_expires_in=self.settings.access_token_expires_in,
+            refresh_token_expires_in=self.settings.refresh_token_expires_in,
         )
 
     async def login(self, email: str, password: str) -> TokenSet:
@@ -84,8 +84,7 @@ class DefaultAuthService(AbstractAuthService):
         if token is None:
             raise AbstractAuthService.InvalidRefreshToken
         if (
-            token.created_at
-            + timedelta(seconds=self.token_config.refresh_token_expires_in)
+            token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
         ) < datetime.now():
             await self.refresh_token_repo.commit_del(token)
             raise AbstractAuthService.InvalidRefreshToken

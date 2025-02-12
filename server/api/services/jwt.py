@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-import jwt
 from pydantic import BaseModel
-
-from shared.config.token import TokenConfig
+from shared.settings import Settings
+import jwt
 
 
 class JwtString(BaseModel):
@@ -24,9 +23,9 @@ class AbstractJwtService(ABC):
 
 
 class DefaultJwtService(AbstractJwtService):
-    def __init__(self, config: TokenConfig):
+    def __init__(self, settings: Settings):
         super().__init__()
-        self.config = config
+        self.settings = settings
 
     def new(self, user_id: int) -> str:
         now = int(datetime.now().timestamp())
@@ -34,9 +33,9 @@ class DefaultJwtService(AbstractJwtService):
             {
                 "sub": str(user_id),
                 "iat": now,
-                "exp": now + self.config.access_token_expires_in,
+                "exp": now + self.settings.access_token_expires_in,
             },
-            self.config.access_token_secret_key,
+            self.settings.access_token_secret_key,
             "HS256",
         )
 
@@ -44,7 +43,7 @@ class DefaultJwtService(AbstractJwtService):
         try:
             obj = jwt.decode(
                 value,
-                self.config.access_token_secret_key,
+                self.settings.access_token_secret_key,
                 ["HS256"],
                 verify=True,
             )

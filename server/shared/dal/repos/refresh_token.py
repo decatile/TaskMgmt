@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import cast
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.config.token import TokenConfig
+from shared.settings import Settings
 from shared.dal.models import RefreshToken
 
 
@@ -18,10 +18,10 @@ class AbstractRefreshTokenRepo(ABC):
 
 
 class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
-    def __init__(self, session: AsyncSession, config: TokenConfig):
+    def __init__(self, session: AsyncSession, settings: Settings):
         super().__init__()
         self.session = session
-        self.config = config
+        self.settings = settings
 
     async def find_by_id(self, id: str) -> RefreshToken | None:
         return cast(
@@ -31,7 +31,7 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
 
     async def commit_new(self, user_id: int) -> RefreshToken:
         token = RefreshToken(
-            expires_in=self.config.refresh_token_expires_in, user_id=user_id
+            expires_in=self.settings.refresh_token_expires_in, user_id=user_id
         )
         self.session.add(token)
         await self.session.flush()

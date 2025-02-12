@@ -5,17 +5,10 @@ from celery.schedules import crontab
 from sqlalchemy import delete, func
 from sqlalchemy.ext.asyncio import create_async_engine
 from shared.dal.models.refresh_token import RefreshToken
-from api.di.database_config import get_database_config
-from api.di.redis_config import get_redis_config
-from api.di.token_config import get_token_config
+from shared.settings import settings
 
-
-redis = get_redis_config()
-token = get_token_config()
-database = get_database_config()
-engine = create_async_engine(database.url)
-
-app = Celery("worker", broker=redis.url)
+engine = create_async_engine(settings.database_url)
+app = Celery("worker", broker=settings.redis_url)
 app.conf.beat_schedule = {
     "cleanup-refresh-tokens": {
         "task": "worker.cleanup_refresh_tokens",
@@ -31,7 +24,7 @@ async def cleanup_refresh_tokens():
             delete(RefreshToken).where(
                 (
                     RefreshToken.created_at
-                    + timedelta(seconds=token.refresh_token_expires_in)
+                    + timedelta(seconds=settings.refresh_token_expires_in)
                 )
                 < func.now()
             )
