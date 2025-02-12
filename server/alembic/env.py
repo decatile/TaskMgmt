@@ -1,7 +1,7 @@
 import asyncio
 from os import environ
 from logging.config import fileConfig
-from shared.dal.models import Base
+from shared.entities.base_model import Base
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config

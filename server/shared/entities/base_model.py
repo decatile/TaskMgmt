@@ -12,5 +12,6 @@ class Base(DeclarativeBase):
         DateTime(timezone=True), server_default=func.now(), server_onupdate=func.now()
     )
 
-    def ts_repr(self) -> str:
+    @property
+    def timestamps(self) -> str:
         return f"created_at={self.created_at!r}, updated_at={self.updated_at!r}"

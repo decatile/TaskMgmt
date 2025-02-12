@@ -2,7 +2,7 @@ from typing import Annotated, Dict
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
 from email_validator import validate_email as validate_email_raw
-from api.services.auth import CompleteTokenSet, TokenSet
+from api.services.auth import AccessTokenSet, RefreshTokenSet
 import re
 
 
@@ -65,7 +65,7 @@ def refresh_token_cookie(value: str, max_age: int) -> Dict[str, str]:
     }
 
 
-def response_from_set(value: TokenSet | CompleteTokenSet) -> JSONResponse:
+def response_from_set(value: AccessTokenSet | RefreshTokenSet) -> JSONResponse:
     return JSONResponse(
         {
             "access_token": value.access_token,
@@ -74,6 +74,6 @@ def response_from_set(value: TokenSet | CompleteTokenSet) -> JSONResponse:
         headers=refresh_token_cookie(
             value.refresh_token, value.refresh_token_expires_in
         )
-        if isinstance(value, CompleteTokenSet)
+        if isinstance(value, RefreshTokenSet)
         else None,
     )

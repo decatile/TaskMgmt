@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from shared.dal.models.user import User
+from shared.entities.user import User
 from api.di.current_user import get_current_user
 from api.dto.profile import ProfileResponse
 

@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.dal.repos.user import AbstractUserRepo, DatabaseUserRepo
+from shared.entities.user import AbstractUserRepo, DatabaseUserRepo
 from api.di.session import get_session
 
 

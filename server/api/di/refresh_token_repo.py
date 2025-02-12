@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.di.settings import get_settings
 from shared.settings import Settings
-from shared.dal.repos.refresh_token import (
+from shared.entities.refresh_token import (
     AbstractRefreshTokenRepo,
     DatabaseRefreshTokenRepo,
 )

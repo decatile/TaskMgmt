@@ -4,7 +4,7 @@ from sqlalchemy import select, delete, func
 from datetime import timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from shared.settings import Settings
-from shared.dal.models import RefreshToken
+from shared.entities.refresh_token import RefreshToken
 
 
 class AbstractRefreshTokenRepo(ABC):

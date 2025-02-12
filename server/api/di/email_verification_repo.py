@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.di.settings import get_settings
-from shared.dal.repos.email_verification import (
+from shared.entities.email_verification import (
     AbstractEmailVerificationRepo,
     DatabaseEmailVerificationRepo,
 )

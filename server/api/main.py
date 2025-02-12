@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routing.auth import auth_router
-from .routing.profile import profile_router
+from .http.auth import auth_router
+from .http.profile import profile_router
 from .di.settings import get_settings
 
 app = FastAPI()

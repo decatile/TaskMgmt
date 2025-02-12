@@ -2,8 +2,8 @@ from typing import Literal, cast
 from abc import ABC, abstractmethod
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.dal.models import User
-from api.utils.hash import hash_password
+from shared.entities.user import User
+from shared.utils import hash_password
 
 
 class AbstractUserRepo(ABC):

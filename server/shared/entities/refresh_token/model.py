@@ -1,8 +1,8 @@
 from sqlalchemy import UUID, ForeignKey
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from uuid import uuid4
-from .user import User
-from .base import Base
+from ..user import User
+from ..base_model import Base
 
 
 class RefreshToken(Base):
@@ -14,5 +14,5 @@ class RefreshToken(Base):
 
     def __repr__(self) -> str:
         return (
-            f"RefreshToken(id={self.id!r}, user_id={self.user_id!r}, {self.ts_repr()})"
+            f"RefreshToken(id={self.id!r}, user_id={self.user_id!r}, {self.timestamps})"
         )

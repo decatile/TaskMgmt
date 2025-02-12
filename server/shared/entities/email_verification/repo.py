@@ -3,7 +3,7 @@ from typing import cast
 from sqlalchemy import select, delete, func
 from datetime import timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.dal.models.email_verification import EmailVerification
+from shared.entities.email_verification import EmailVerification
 from shared.settings import Settings
 from random import randint
 
@@ -37,7 +37,8 @@ class DatabaseEmailVerificationRepo(AbstractEmailVerificationRepo):
     async def commit_new(self, user_id: int) -> EmailVerification:
         token = EmailVerification(
             code=str(randint(0, 9999)).zfill(4),
-            expires_in=self.settings.refresh_token_expires_in, user_id=user_id
+            expires_in=self.settings.refresh_token_expires_in,
+            user_id=user_id,
         )
         self.session.add(token)
         await self.session.flush()

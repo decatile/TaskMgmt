@@ -1,19 +1,9 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from datetime import datetime
-from typing import ClassVar, List
+from typing import List
 from shared.settings import Settings
+from .models import JwtObject
 import jwt
-
-
-@dataclass
-class JwtObject:
-    user_id: int
-    roles: List[str]
-    email_verify: int | None
-
-    ROLE_API: ClassVar = "api"
-    ROLE_EMAIL_VERIFICATION: ClassVar = "email_verify"
 
 
 class AbstractJwtService(ABC):
