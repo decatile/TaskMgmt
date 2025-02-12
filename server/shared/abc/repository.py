@@ -23,23 +23,23 @@ class ABCRepository[TEntity: Entity, TId](ABC):
 class Repository[TEntity: Entity, TId](ABCRepository[TEntity, TId]):
     def __init__(self, entity_type: Type[TEntity], session: AsyncSession):
         super().__init__()
-        self.__session = session
-        self.__type = entity_type
+        self._session = session
+        self._type = entity_type
 
     def get_class(self) -> Type[TEntity]:
-        return self.__type
+        return self._type
 
     async def find(self, key: TId) -> TEntity | None:
         try:
-            return await self.__session.get_one(self.__type, key)
+            return await self._session.get_one(self._type, key)
         except NoResultFound:
             return None
 
     async def save(self, *instance: TEntity) -> None:
-        await self.__session.flush(instance)
+        await self._session.flush(instance)
 
     async def delete(self, *key: TId) -> int:
-        result = await self.__session.execute(
-            delete(self.__type).where(self.__type.id.in_(key))
+        result = await self._session.execute(
+            delete(self._type).where(self._type.id.in_(key))
         )
         return result.rowcount

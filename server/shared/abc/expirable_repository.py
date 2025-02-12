@@ -21,10 +21,10 @@ class ExpirableRepository[TEntity: Entity, TKey](Repository[TEntity, TKey], ABC)
         predicate: Callable[[Self], ColumnExpressionArgument[bool]],
     ):
         super().__init__(entity_type, session)
-        self.__predicate = predicate
+        self._predicate = predicate
 
     async def cleanup_expired(self):
-        result = await self.__session.execute(
-            delete(self.__type).where(self.__predicate(self))
+        result = await self._session.execute(
+            delete(self._type).where(self._predicate(self))
         )
         return result.rowcount

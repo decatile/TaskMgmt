@@ -21,11 +21,11 @@ class DatabaseRefreshTokenRepository(
             session,
             lambda _: (
                 RefreshToken.created_at
-                + timedelta(seconds=self.__settings.refresh_token_expires_in)
+                + timedelta(seconds=self._settings.refresh_token_expires_in)
             )
             < func.now(),
         )
-        self.__settings = settings
+        self._settings = settings
 
     def new(self, user_id: int) -> RefreshToken:
         return RefreshToken(user_id=user_id)

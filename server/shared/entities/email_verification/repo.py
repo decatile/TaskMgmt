@@ -22,15 +22,15 @@ class DatabaseEmailVerificationRepository(
             session,
             lambda _: (
                 EmailVerification.created_at
-                + timedelta(seconds=self.__settings.email_verification_code_expires_in)
+                + timedelta(seconds=self._settings.email_verification_code_expires_in)
             )
             < func.now(),
         )
-        self.__settings = settings
+        self._settings = settings
 
     def new(self, user_id: int) -> EmailVerification:
         return EmailVerification(
             code=str(randint(0, 9999)).zfill(4),
-            expires_in=self.__settings.refresh_token_expires_in,
+            expires_in=self._settings.refresh_token_expires_in,
             user_id=user_id,
         )
