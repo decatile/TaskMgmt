@@ -32,7 +32,7 @@ def upgrade() -> None:
     )
     op.create_table('email_verification',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('code', sa.Integer(), nullable=False),
+    sa.Column('code', sa.String(length=4), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

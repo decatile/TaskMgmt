@@ -2,7 +2,7 @@ from typing import Annotated, Dict
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
 from email_validator import validate_email as validate_email_raw
-from api.services.auth import TokenSet
+from api.services.auth import CompleteTokenSet, TokenSet
 import re
 
 
@@ -32,9 +32,16 @@ def validate_password(value: str) -> str:
     return value
 
 
+def validate_verification_code(value: str) -> str:
+    if (len(value) != 4) or not re.fullmatch(r"\d{4}", value):
+        raise ValueError("invalid verification code")
+    return value
+
+
 Email = Annotated[str, AfterValidator(validate_email)]
 Username = Annotated[str, AfterValidator(validate_username)]
 Password = Annotated[str, AfterValidator(validate_password)]
+VerificationCode = Annotated[str, AfterValidator(validate_verification_code)]
 
 
 class LoginRequest(BaseModel):
@@ -48,13 +55,17 @@ class RegisterRequest(BaseModel):
     password: Password
 
 
+class VerifyRequest(BaseModel):
+    code: VerificationCode
+
+
 def refresh_token_cookie(value: str, max_age: int) -> Dict[str, str]:
     return {
         "Set-Cookie": f"refresh_token={value}; max-age={max_age}; path=/auth/refresh"
     }
 
 
-def response_from_set(value: TokenSet) -> JSONResponse:
+def response_from_set(value: TokenSet | CompleteTokenSet) -> JSONResponse:
     return JSONResponse(
         {
             "access_token": value.access_token,
@@ -62,5 +73,7 @@ def response_from_set(value: TokenSet) -> JSONResponse:
         },
         headers=refresh_token_cookie(
             value.refresh_token, value.refresh_token_expires_in
-        ),
+        )
+        if isinstance(value, CompleteTokenSet)
+        else None,
     )

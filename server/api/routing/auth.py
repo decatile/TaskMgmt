@@ -5,10 +5,15 @@ from api.di.auth_service import get_auth_service
 from api.dto.auth import (
     LoginRequest,
     RegisterRequest,
+    VerifyRequest,
     refresh_token_cookie,
     response_from_set,
 )
 from api.services.auth import AbstractAuthService
+from api.di.current_email_verification_user import (
+    UserWithEmailVerify,
+    get_current_email_verification_user,
+)
 
 
 auth_router = APIRouter()
@@ -57,4 +62,21 @@ async def refresh(
             "Invalid refresh token",
             headers=refresh_token_cookie(refresh_token, -1),
         )
+    return response_from_set(token_set)
+
+
+@auth_router.post("/verify")
+async def verify(
+    creds: Annotated[UserWithEmailVerify, Depends(get_current_email_verification_user)],
+    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    code: VerifyRequest,
+):
+    try:
+        token_set = await auth_service.verify(
+            creds.user.id, creds.email_verify_id, code=code.code
+        )
+    except AbstractAuthService.InvalidVerifyId:
+        raise HTTPException(403, "Invalid bearer")
+    except AbstractAuthService.InvalidCode:
+        raise HTTPException(403, "Invalid code")
     return response_from_set(token_set)
