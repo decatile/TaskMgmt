@@ -1,18 +1,19 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
-from typing import List
-from pydantic import BaseModel
+from typing import ClassVar, List
 from shared.settings import Settings
 import jwt
 
 
-class JwtObject(BaseModel):
+@dataclass
+class JwtObject:
     user_id: int
     roles: List[str]
     email_verify: int | None
 
-    ROLE_API = "api"
-    ROLE_EMAIL_VERIFICATION = "email_verify"
+    ROLE_API: ClassVar = "api"
+    ROLE_EMAIL_VERIFICATION: ClassVar = "email_verify"
 
 
 class AbstractJwtService(ABC):

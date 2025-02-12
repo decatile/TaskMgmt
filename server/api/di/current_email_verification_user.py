@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from dataclasses import dataclass
 from shared.dal.models.user import User
 from shared.dal.repos.user import AbstractUserRepo
 from api.di.jwt_service import get_jwt_service
@@ -9,7 +9,8 @@ from api.di.user_repo import get_user_repo
 from api.services.jwt import AbstractJwtService
 
 
-class UserWithEmailVerify(BaseModel):
+@dataclass
+class UserWithEmailVerify:
     user: User
     email_verify_id: int
 
