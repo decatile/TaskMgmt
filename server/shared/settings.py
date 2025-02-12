@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    is_dev: bool
     database_url: str
     redis_url: str
     access_token_secret_key: str
