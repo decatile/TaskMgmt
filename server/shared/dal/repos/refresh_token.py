@@ -34,9 +34,7 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
         )
 
     async def commit_new(self, user_id: int) -> RefreshToken:
-        token = RefreshToken(
-            expires_in=self.settings.refresh_token_expires_in, user_id=user_id
-        )
+        token = RefreshToken(user_id=user_id)
         self.session.add(token)
         await self.session.flush()
         return token
