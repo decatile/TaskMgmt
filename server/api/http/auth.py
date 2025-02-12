@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Cookie, Depends, HTTPException
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
 from api.di.auth_service import get_auth_service
 from api.dto.auth import (
@@ -49,22 +49,6 @@ async def register(
     return response_from_set(token_set)
 
 
-@auth_router.post("/refresh")
-async def refresh(
-    refresh_token: Annotated[str, Cookie()],
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
-) -> JSONResponse:
-    try:
-        token_set = await auth_service.refresh(refresh_token)
-    except AbstractAuthService.InvalidRefreshToken:
-        raise HTTPException(
-            403,
-            "Invalid refresh token",
-            headers=refresh_token_cookie(refresh_token, -1),
-        )
-    return response_from_set(token_set)
-
-
 @auth_router.post("/verify")
 async def verify(
     creds: Annotated[UserWithEmailVerify, Depends(get_current_email_verification_user)],
@@ -80,3 +64,28 @@ async def verify(
     except AbstractAuthService.InvalidCode:
         raise HTTPException(403, "Invalid code")
     return response_from_set(token_set)
+
+
+@auth_router.post("/refresh/roll")
+async def refresh(
+    refresh_token: Annotated[str, Cookie()],
+    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+) -> JSONResponse:
+    try:
+        token_set = await auth_service.refresh(refresh_token)
+    except AbstractAuthService.InvalidRefreshToken:
+        raise HTTPException(
+            403,
+            "Invalid refresh token",
+            headers=refresh_token_cookie(refresh_token, -1),
+        )
+    return response_from_set(token_set)
+
+
+@auth_router.post("/refresh/logout")
+async def logout(
+    refresh_token: Annotated[str, Cookie()],
+    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+) -> Response:
+    await auth_service.logout(refresh_token)
+    return JSONResponse({"logout": 1}, headers=refresh_token_cookie(refresh_token, -1))

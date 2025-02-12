@@ -18,4 +18,4 @@ app.conf.beat_schedule = {
 @app.task
 async def task():
     async with AsyncSession(engine) as session, engine.begin():
-        await DatabaseRefreshTokenRepo(session, settings).remove_expired()
+        await DatabaseRefreshTokenRepo(session, settings).delete_expired_tokens()

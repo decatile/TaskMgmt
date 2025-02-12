@@ -12,13 +12,16 @@ class AbstractRefreshTokenRepo(ABC):
     async def find_by_id(self, id: str) -> RefreshToken | None: ...
 
     @abstractmethod
-    async def commit_new(self, user_id: int) -> RefreshToken: ...
+    async def create_new_token(self, user_id: int) -> RefreshToken: ...
 
     @abstractmethod
-    async def commit_del(self, token: RefreshToken) -> None: ...
+    async def delete_by_id(self, token_id: str) -> None: ...
 
     @abstractmethod
-    async def remove_expired(self) -> int: ...
+    async def delete_token(self, token: RefreshToken) -> None: ...
+
+    @abstractmethod
+    async def delete_expired_tokens(self) -> int: ...
 
 
 class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
@@ -33,16 +36,21 @@ class DatabaseRefreshTokenRepo(AbstractRefreshTokenRepo):
             await self.session.scalar(select(RefreshToken.id == id)),
         )
 
-    async def commit_new(self, user_id: int) -> RefreshToken:
+    async def create_new_token(self, user_id: int) -> RefreshToken:
         token = RefreshToken(user_id=user_id)
         self.session.add(token)
         await self.session.flush()
         return token
 
-    async def commit_del(self, token: RefreshToken) -> None:
+    async def delete_by_id(self, token_id: str) -> None:
+        await self.session.execute(
+            delete(RefreshToken).where(RefreshToken.id == token_id)
+        )
+
+    async def delete_token(self, token: RefreshToken) -> None:
         await self.session.delete(token)
-    
-    async def remove_expired(self) -> int:
+
+    async def delete_expired_tokens(self) -> int:
         result = await self.session.execute(
             delete(RefreshToken).where(
                 (

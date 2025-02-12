@@ -43,6 +43,9 @@ class AbstractAuthService(ABC):
         self, user_id: int, email_verification_id: int, code: str
     ) -> RefreshTokenSet: ...
 
+    @abstractmethod
+    async def logout(self, refresh_token_id: str) -> None: ...
+
 
 class DefaultAuthService(AbstractAuthService):
     def __init__(
@@ -80,7 +83,7 @@ class DefaultAuthService(AbstractAuthService):
         self, user_id: int, roles: List[str]
     ) -> RefreshTokenSet:
         jwt = self.jwt_service.new(user_id, roles)
-        refresh = await self.refresh_token_repo.commit_new(user_id)
+        refresh = await self.refresh_token_repo.create_new_token(user_id)
         return RefreshTokenSet(
             access_token=jwt,
             refresh_token=str(refresh.id),
@@ -121,7 +124,7 @@ class DefaultAuthService(AbstractAuthService):
         if (
             token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
         ) < datetime.now():
-            await self.refresh_token_repo.commit_del(token)
+            await self.refresh_token_repo.delete_token(token)
             raise AbstractAuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id, [JwtRoles.API])
 
@@ -135,3 +138,6 @@ class DefaultAuthService(AbstractAuthService):
             raise AbstractAuthService.InvalidCode
         await self.user_repo.enable(user_id)
         return await self._generate_complete_jwt_set(user_id, [JwtRoles.API])
+
+    async def logout(self, refresh_token_id: str) -> None:
+        await self.refresh_token_repo.delete_by_id(refresh_token_id)
