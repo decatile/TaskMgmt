@@ -6,12 +6,12 @@ export const ENDPOINTS = {
   LOGOUT: '/auth/logout',
 };
 
-export const register = (login: string, password: string) => {
-  return api.post(ENDPOINTS.REGISTER, { login, password });
+export const register = (email: string, username: string, password: string) => {
+  return api.post(ENDPOINTS.REGISTER, { email, username, password });
 };
 
-export const login = (login: string, password: string) => {
-  return api.post(ENDPOINTS.LOGIN, { login, password });
+export const login = (email: string, password: string) => {
+  return api.post(ENDPOINTS.LOGIN, { email, password });
 };
 
 export const logout = () => {

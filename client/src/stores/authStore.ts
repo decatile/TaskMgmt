@@ -10,12 +10,12 @@ class AuthStore {
     makeAutoObservable(this);
   }
 
-  async register(loginName: string, password: string) {
+  async register(email: string, username: string, password: string) {
     this.status = 'loading';
     this.error = null;
 
     try {
-      const response = await AuthService.register(loginName, password);
+      const response = await AuthService.register(email, username, password);
       this.user = response.data;
       this.status = 'succeeded';
     } catch (err: any) {
@@ -24,12 +24,12 @@ class AuthStore {
     }
   }
 
-  async login(loginName: string, password: string) {
+  async login(email: string, password: string) {
     this.status = 'loading';
     this.error = null;
 
     try {
-      const response = await AuthService.login(loginName, password);
+      const response = await AuthService.login(email, password);
       this.user = response.data;
       this.status = 'succeeded';
     } catch (err: any) {
