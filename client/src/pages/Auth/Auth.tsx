@@ -1,23 +1,44 @@
+import { observer } from 'mobx-react';
 import React, { useState } from 'react';
+import authStore from '../../stores/authStore';
 
-const Auth = () => {
-  const [login, setLogin] = useState();
-  const [password, setPassword] = useState();
+const Auth = observer(() => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await authStore.login(email, password);
+  };
 
   return (
     <div>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="">Логин</label>
-          <input type="text" />
+          <label htmlFor="">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Email"
+          />
         </div>
         <div>
-          <label htmlFor="">Пароль</label>
-          <input type="text" />
+          <label htmlFor="">Password</label>
+          <input
+            type="text"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Password"
+          />
         </div>
+        <button type="submit" disabled={authStore.status === 'loading'}>
+          {authStore.status === 'loading' ? 'Loading...' : 'Login'}
+        </button>
+        {authStore.status === 'failed' && <p>Error: {authStore.error}</p>}
       </form>
     </div>
   );
-};
+});
 
 export default Auth;
