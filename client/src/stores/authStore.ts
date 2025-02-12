@@ -2,8 +2,8 @@ import { makeAutoObservable } from 'mobx';
 import * as AuthService from '../services/AuthService';
 
 class AuthStore {
-  user: any = null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed' = 'idle';
+  accessToken: string | null = '';
+  status: 'idle' | 'loading' | 'success' | 'failed' = 'idle';
   error: string | null = null;
 
   constructor() {
@@ -16,8 +16,9 @@ class AuthStore {
 
     try {
       const response = await AuthService.register(email, username, password);
-      this.user = response.data;
-      this.status = 'succeeded';
+      console.log('res', response);
+      this.accessToken = response.data.access_token;
+      this.status = 'success';
     } catch (err: any) {
       this.status = 'failed';
       this.error = err.message;
@@ -30,8 +31,21 @@ class AuthStore {
 
     try {
       const response = await AuthService.login(email, password);
-      this.user = response.data;
-      this.status = 'succeeded';
+      this.accessToken = response.data.access_token;
+      this.status = 'success';
+    } catch (err: any) {
+      this.status = 'failed';
+      this.error = err.message;
+    }
+  }
+
+  async refreshToken() {
+    this.status = 'loading';
+    this.error = null;
+    try {
+      const response = await AuthService.refreshToken();
+      this.accessToken = response.data.access_token;
+      this.status = 'success';
     } catch (err: any) {
       this.status = 'failed';
       this.error = err.message;
@@ -39,7 +53,7 @@ class AuthStore {
   }
 
   async logout() {
-    this.user = null;
+    this.accessToken = null;
   }
 }
 
