@@ -1,8 +1,8 @@
 from .model import EmailVerification
-from .repo import AbstractEmailVerificationRepo, DatabaseEmailVerificationRepo
+from .repo import ABCEmailVerificationRepository, DatabaseEmailVerificationRepository
 
 __all__ = (
     "EmailVerification",
-    "AbstractEmailVerificationRepo",
-    "DatabaseEmailVerificationRepo",
+    "ABCEmailVerificationRepository",
+    "DatabaseEmailVerificationRepository",
 )

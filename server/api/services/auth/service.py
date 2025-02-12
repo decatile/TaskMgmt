@@ -4,9 +4,9 @@ from typing import List
 
 from api.services.jwt.models import JwtRoles
 from api.services.jwt.service import AbstractJwtService
-from shared.entities.email_verification.repo import AbstractEmailVerificationRepo
-from shared.entities.refresh_token.repo import AbstractRefreshTokenRepo
-from shared.entities.user.repo import AbstractUserRepo
+from shared.entities.email_verification.repo import ABCEmailVerificationRepository
+from shared.entities.refresh_token.repo import ABCRefreshTokenRepository
+from shared.entities.user.repo import ABCUserRepository
 from shared.settings import Settings
 from shared.utils import validate_password
 from .models import AccessTokenSet, RefreshTokenSet
@@ -50,9 +50,9 @@ class AbstractAuthService(ABC):
 class DefaultAuthService(AbstractAuthService):
     def __init__(
         self,
-        user_repo: AbstractUserRepo,
-        refresh_token_repo: AbstractRefreshTokenRepo,
-        email_verification_repo: AbstractEmailVerificationRepo,
+        user_repo: ABCUserRepository,
+        refresh_token_repo: ABCRefreshTokenRepository,
+        email_verification_repo: ABCEmailVerificationRepository,
         jwt_service: AbstractJwtService,
         settings: Settings,
     ):
@@ -83,7 +83,8 @@ class DefaultAuthService(AbstractAuthService):
         self, user_id: int, roles: List[str]
     ) -> RefreshTokenSet:
         jwt = self.jwt_service.new(user_id, roles)
-        refresh = await self.refresh_token_repo.create_new_token(user_id)
+        refresh = self.refresh_token_repo.new(user_id)
+        await self.refresh_token_repo.save(refresh)
         return RefreshTokenSet(
             access_token=jwt,
             refresh_token=str(refresh.id),
@@ -114,24 +115,25 @@ class DefaultAuthService(AbstractAuthService):
             # # send email
             # return self._generate_jwt_set_email(user.id, [JwtRoles.EMAIL_VERIFICATION], email_verify.id)
         else:
-            user = await self.user_repo.commit_new(email, username, password, True)
+            user = self.user_repo.new(email, username, password, True)
+            await self.user_repo.save(user)
             return await self._generate_complete_jwt_set(user.id, [JwtRoles.API])
 
     async def refresh(self, refresh_token: str) -> RefreshTokenSet:
-        token = await self.refresh_token_repo.find_by_id(refresh_token)
+        token = await self.refresh_token_repo.find(refresh_token)
         if token is None:
             raise AbstractAuthService.InvalidRefreshToken
         if (
             token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
         ) < datetime.now():
-            await self.refresh_token_repo.delete_token(token)
+            await self.refresh_token_repo.delete(str(token.id))
             raise AbstractAuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id, [JwtRoles.API])
 
     async def verify(
         self, user_id: int, email_verify_id: int, code: str
     ) -> RefreshTokenSet:
-        verify = await self.email_verification_repo.find_by_id(email_verify_id)
+        verify = await self.email_verification_repo.find(email_verify_id)
         if verify is None:
             raise AbstractAuthService.InvalidVerifyId
         if verify.code != code:
@@ -140,4 +142,4 @@ class DefaultAuthService(AbstractAuthService):
         return await self._generate_complete_jwt_set(user_id, [JwtRoles.API])
 
     async def logout(self, refresh_token_id: str) -> None:
-        await self.refresh_token_repo.delete_by_id(refresh_token_id)
+        await self.refresh_token_repo.delete(refresh_token_id)

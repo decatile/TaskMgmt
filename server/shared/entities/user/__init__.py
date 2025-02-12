@@ -1,4 +1,4 @@
 from .model import User
-from .repo import AbstractUserRepo, DatabaseUserRepo
+from .repo import ABCUserRepository, DatabaseUserRepository
 
-__all__ = ("User", "AbstractUserRepo", "DatabaseUserRepo")
+__all__ = ("User", "ABCUserRepository", "DatabaseUserRepository")
