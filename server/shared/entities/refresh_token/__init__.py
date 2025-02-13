@@ -1,4 +1,4 @@
 from .model import RefreshToken
-from .repo import ABCRefreshTokenRepository, DatabaseRefreshTokenRepository
+from .repo import RefreshTokenRepository
 
-__all__ = ('RefreshToken','ABCRefreshTokenRepository','DatabaseRefreshTokenRepository')
+__all__ = ("RefreshToken", "RefreshTokenRepository")

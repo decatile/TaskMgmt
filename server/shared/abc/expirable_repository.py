@@ -1,19 +1,11 @@
-from abc import ABC, abstractmethod
 from typing import Callable, Self, Type
 from sqlalchemy import delete
 from sqlalchemy.sql import ColumnExpressionArgument
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from .entity import Entity
-from .repository import ABCRepository, Repository
+from .repository import Repository
 
-
-class ABCExpirableRepository[TEntity: Entity, TKey](ABCRepository[TEntity, TKey]):
-    @abstractmethod
-    async def cleanup_expired(self): ...
-
-
-class ExpirableRepository[TEntity: Entity, TKey](Repository[TEntity, TKey], ABC):
+class ExpirableRepository[TEntity: Entity, TKey](Repository[TEntity, TKey]):
     def __init__(
         self,
         entity_type: Type[TEntity],

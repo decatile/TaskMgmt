@@ -11,5 +11,3 @@ class Settings(BaseSettings):
     email_verification_enable: bool
     email_verification_code_expires_in: int
 
-
-settings = Settings()  # type: ignore[call-arg]

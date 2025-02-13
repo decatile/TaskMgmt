@@ -1,21 +1,13 @@
-from abc import abstractmethod
 from sqlalchemy import func
 from datetime import timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.abc.expirable_repository import ABCExpirableRepository, ExpirableRepository
+from shared.abc import ExpirableRepository
 from shared.entities.email_verification import EmailVerification
 from shared.settings import Settings
 from random import randint
 
 
-class ABCEmailVerificationRepository(ABCExpirableRepository[EmailVerification, int]):
-    @abstractmethod
-    def new(self, user_id: int) -> EmailVerification: ...
-
-
-class DatabaseEmailVerificationRepository(
-    ExpirableRepository[EmailVerification, int], ABCEmailVerificationRepository
-):
+class EmailVerificationRepository(ExpirableRepository[EmailVerification, int]):
     def __init__(self, session: AsyncSession, settings: Settings):
         super().__init__(
             EmailVerification,

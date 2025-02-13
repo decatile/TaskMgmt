@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from api.services.jwt.models import JwtScope
 from api.dto.base import DetailedHTTPException
 from shared.entities.user import User
-from shared.entities.user import ABCUserRepository
+from shared.entities.user import UserRepository
 from api.di.jwt_service import get_jwt_service
 from api.di.user_repo import get_user_repo
-from api.services.jwt import AbstractJwtService
+from api.services.jwt import JwtService
 
 
 @dataclass
@@ -21,8 +21,8 @@ async def get_current_email_verification_user(
     credentials: Annotated[
         HTTPAuthorizationCredentials | None, Depends(HTTPBearer(auto_error=False))
     ],
-    jwt_service: Annotated[AbstractJwtService, Depends(get_jwt_service)],
-    user_repo: Annotated[ABCUserRepository, Depends(get_user_repo)],
+    jwt_service: Annotated[JwtService, Depends(get_jwt_service)],
+    user_repo: Annotated[UserRepository, Depends(get_user_repo)],
 ) -> UserWithEmailVerify:
     if credentials is None:
         raise DetailedHTTPException("access_token_not_present")

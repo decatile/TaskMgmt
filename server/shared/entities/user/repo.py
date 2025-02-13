@@ -1,32 +1,12 @@
 from typing import Literal
-from abc import abstractmethod
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from shared.utils import hash_password
-from shared.abc.repository import ABCRepository, Repository
+from shared.abc import Repository
 from shared.entities.user import User
 
 
-class ABCUserRepository(ABCRepository[User, int]):
-    @abstractmethod
-    async def find_enabled(self, key: int) -> User | None: ...
-
-    @abstractmethod
-    async def find_by_email(self, email: str) -> User | None: ...
-
-    @abstractmethod
-    async def lookup_by_email_or_username(
-        self, email: str, username: str
-    ) -> Literal["none", "email", "username"]: ...
-
-    @abstractmethod
-    def new(self, email: str, username: str, password: str, enabled: bool) -> User: ...
-
-    @abstractmethod
-    async def enable(self, user_id: int) -> None: ...
-
-
-class DatabaseUserRepository(Repository[User, int], ABCUserRepository):
+class UserRepository(Repository[User, int]):
     def __init__(self, session: AsyncSession):
         super().__init__(User, session)
 

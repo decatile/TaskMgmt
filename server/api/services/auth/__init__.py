@@ -1,9 +1,8 @@
-from .service import AbstractAuthService, DefaultAuthService
+from .service import AuthService
 from .models import AccessTokenSet, RefreshTokenSet
 
 __all__ = (
-    "AbstractAuthService",
-    "DefaultAuthService",
+    "AuthService",
     "AccessTokenSet",
     "RefreshTokenSet",
 )

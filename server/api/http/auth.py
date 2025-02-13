@@ -9,7 +9,7 @@ from api.dto.auth import (
     response_from_set,
     response_with_refresh,
 )
-from api.services.auth import AbstractAuthService
+from api.services.auth import AuthService
 from api.di.current_email_verification_user import (
     UserWithEmailVerify,
     get_current_email_verification_user,
@@ -35,13 +35,13 @@ auth_router = APIRouter()
 )
 async def login(
     form: LoginRequest,
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ):
     try:
         token_set = await auth_service.login(form.email, form.password)
-    except AbstractAuthService.UserNotFound:
+    except AuthService.UserNotFound:
         raise DetailedHTTPException("user_not_found")
-    except AbstractAuthService.InvalidPassword:
+    except AuthService.InvalidPassword:
         raise DetailedHTTPException("invalid_password")
     return response_from_set(token_set)
 
@@ -58,15 +58,15 @@ async def login(
 )
 async def register(
     form: RegisterRequest,
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> JSONResponse:
     try:
         token_set = await auth_service.register(
             form.email, form.username, form.password
         )
-    except AbstractAuthService.EmailExists:
+    except AuthService.EmailExists:
         raise DetailedHTTPException("user_already_exist", cause="email")
-    except AbstractAuthService.UsernameExists:
+    except AuthService.UsernameExists:
         raise DetailedHTTPException("user_already_exist", cause="username")
     return response_from_set(token_set)
 
@@ -83,16 +83,16 @@ async def register(
 )
 async def verify(
     creds: Annotated[UserWithEmailVerify, Depends(get_current_email_verification_user)],
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
     code: VerifyRequest,
 ):
     try:
         token_set = await auth_service.verify(
             creds.user.id, creds.email_verify_id, code=code.code
         )
-    except AbstractAuthService.InvalidVerifyId:
+    except AuthService.InvalidVerifyId:
         raise DetailedHTTPException("access_token_poisoned")
-    except AbstractAuthService.InvalidCode:
+    except AuthService.InvalidCode:
         raise DetailedHTTPException("invalid_code")
     return response_from_set(token_set)
 
@@ -110,11 +110,11 @@ async def verify(
 )
 async def refresh(
     refresh_token: Annotated[str, Cookie()],
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> JSONResponse:
     try:
         token_set = await auth_service.refresh(refresh_token)
-    except AbstractAuthService.InvalidRefreshToken:
+    except AuthService.InvalidRefreshToken:
         raise DetailedHTTPException("refresh_token_invalid")
     return response_from_set(token_set)
 
@@ -126,7 +126,7 @@ async def refresh(
 )
 async def logout(
     refresh_token: Annotated[str, Cookie()],
-    auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> Response:
     await auth_service.logout(refresh_token)
     response = Response()

@@ -1,21 +1,9 @@
-from abc import ABC, abstractmethod
 from datetime import datetime
 from shared.settings import Settings
 from .models import JwtObject
 import jwt
 
-
-class AbstractJwtService(ABC):
-    @abstractmethod
-    def new(
-        self, user_id: int, scope: str, email_verification_id: int | None = None
-    ) -> str: ...
-
-    @abstractmethod
-    def from_string(self, value: str) -> JwtObject | None: ...
-
-
-class DefaultJwtService(AbstractJwtService):
+class JwtService:
     def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings

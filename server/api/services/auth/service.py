@@ -1,17 +1,15 @@
-from abc import ABC, abstractmethod
 from datetime import timedelta
-
-from api.services.jwt.models import JwtScope
-from api.services.jwt.service import AbstractJwtService
-from shared.entities.email_verification.repo import ABCEmailVerificationRepository
-from shared.entities.refresh_token.repo import ABCRefreshTokenRepository
-from shared.entities.user.repo import ABCUserRepository
+from api.services.jwt import JwtScope
+from api.services.jwt import JwtService
+from shared.entities.email_verification import EmailVerificationRepository
+from shared.entities.refresh_token import RefreshTokenRepository
+from shared.entities.user.repo import UserRepository
 from shared.settings import Settings
 from shared.utils import datetime_now, validate_password
 from .models import AccessTokenSet, RefreshTokenSet
 
 
-class AbstractAuthService(ABC):
+class AuthService:
     class UserNotFound(Exception): ...
 
     class InvalidPassword(Exception): ...
@@ -26,33 +24,12 @@ class AbstractAuthService(ABC):
 
     class InvalidCode(Exception): ...
 
-    @abstractmethod
-    async def login(self, email: str, password: str) -> RefreshTokenSet: ...
-
-    @abstractmethod
-    async def register(
-        self, email: str, username: str, password: str
-    ) -> AccessTokenSet | RefreshTokenSet: ...
-
-    @abstractmethod
-    async def refresh(self, refresh_token: str) -> RefreshTokenSet: ...
-
-    @abstractmethod
-    async def verify(
-        self, user_id: int, email_verification_id: int, code: str
-    ) -> RefreshTokenSet: ...
-
-    @abstractmethod
-    async def logout(self, refresh_token_id: str) -> None: ...
-
-
-class DefaultAuthService(AbstractAuthService):
     def __init__(
         self,
-        user_repo: ABCUserRepository,
-        refresh_token_repo: ABCRefreshTokenRepository,
-        email_verification_repo: ABCEmailVerificationRepository,
-        jwt_service: AbstractJwtService,
+        user_repo: UserRepository,
+        refresh_token_repo: RefreshTokenRepository,
+        email_verification_repo: EmailVerificationRepository,
+        jwt_service: JwtService,
         settings: Settings,
     ):
         super().__init__()
@@ -62,9 +39,7 @@ class DefaultAuthService(AbstractAuthService):
         self.jwt_service = jwt_service
         self.settings = settings
 
-    def _generate_jwt_set_email(
-        self, user_id: int, email_verify: int
-    ):
+    def _generate_jwt_set_email(self, user_id: int, email_verify: int):
         jwt = self.jwt_service.new(user_id, JwtScope.EMAIL_VERIFICATION, email_verify)
         return AccessTokenSet(
             scope=JwtScope.EMAIL_VERIFICATION,
@@ -95,9 +70,9 @@ class DefaultAuthService(AbstractAuthService):
     async def login(self, email: str, password: str) -> RefreshTokenSet:
         user = await self.user_repo.find_by_email(email)
         if user is None:
-            raise AbstractAuthService.UserNotFound
+            raise AuthService.UserNotFound()
         if not validate_password(user.password_hash, password):
-            raise AbstractAuthService.InvalidPassword
+            raise AuthService.InvalidPassword
         return await self._generate_complete_jwt_set(user.id)
 
     async def register(
@@ -105,9 +80,9 @@ class DefaultAuthService(AbstractAuthService):
     ) -> AccessTokenSet | RefreshTokenSet:
         match await self.user_repo.lookup_by_email_or_username(email, username):
             case "email":
-                raise AbstractAuthService.EmailExists
+                raise AuthService.EmailExists
             case "username":
-                raise AbstractAuthService.UsernameExists
+                raise AuthService.UsernameExists
         if self.settings.email_verification_enable:
             raise NotImplementedError
             # user = await self.user_repo.commit_new(email, username, password, False)
@@ -122,12 +97,12 @@ class DefaultAuthService(AbstractAuthService):
     async def refresh(self, refresh_token: str) -> RefreshTokenSet:
         token = await self.refresh_token_repo.find(refresh_token)
         if token is None:
-            raise AbstractAuthService.InvalidRefreshToken
+            raise AuthService.InvalidRefreshToken
         await self.refresh_token_repo.delete(str(token.id))
         if (
             token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
         ) < datetime_now():
-            raise AbstractAuthService.InvalidRefreshToken
+            raise AuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id)
 
     async def verify(
@@ -135,9 +110,9 @@ class DefaultAuthService(AbstractAuthService):
     ) -> RefreshTokenSet:
         verify = await self.email_verification_repo.find(email_verify_id)
         if verify is None:
-            raise AbstractAuthService.InvalidVerifyId
+            raise AuthService.InvalidVerifyId
         if verify.code != code:
-            raise AbstractAuthService.InvalidCode
+            raise AuthService.InvalidCode
         await self.user_repo.enable(user_id)
         return await self._generate_complete_jwt_set(user_id)
 
