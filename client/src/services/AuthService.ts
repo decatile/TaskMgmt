@@ -16,11 +16,9 @@ export const login = (email: string, password: string) => {
 };
 
 export const refreshToken = () => {
-  return api.post(ENDPOINTS.REFRESH_TOKEN, null, {
-    withCredentials: true,
-  });
+  return api.get(ENDPOINTS.REFRESH_TOKEN);
 };
 
 export const logout = () => {
-  return api.post(ENDPOINTS.LOGOUT);
+  return api.get(ENDPOINTS.LOGOUT);
 };

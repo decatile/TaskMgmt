@@ -14,7 +14,7 @@ class ABCRepository[TEntity: Entity, TId](ABC):
     async def find(self, key: TId) -> TEntity | None: ...
 
     @abstractmethod
-    async def save(self, *instance: TEntity) -> None: ...
+    async def save(self, instance: TEntity) -> None: ...
 
     @abstractmethod
     async def delete(self, *key: TId) -> int: ...
@@ -36,7 +36,8 @@ class Repository[TEntity: Entity, TId](ABCRepository[TEntity, TId]):
             return None
 
     async def save(self, *instance: TEntity) -> None:
-        await self._session.flush(instance)
+        self._session.add_all(instance)
+        await self._session.flush()
 
     async def delete(self, *key: TId) -> int:
         result = await self._session.execute(

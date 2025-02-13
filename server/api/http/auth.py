@@ -6,8 +6,8 @@ from api.dto.auth import (
     LoginRequest,
     RegisterRequest,
     VerifyRequest,
-    refresh_token_cookie,
     response_from_set,
+    response_with_refresh,
 )
 from api.services.auth import AbstractAuthService
 from api.di.current_email_verification_user import (
@@ -60,13 +60,13 @@ async def verify(
             creds.user.id, creds.email_verify_id, code=code.code
         )
     except AbstractAuthService.InvalidVerifyId:
-        raise HTTPException(403, "Invalid bearer")
+        raise HTTPException(401, "Verification associated with access token not found")
     except AbstractAuthService.InvalidCode:
-        raise HTTPException(403, "Invalid code")
+        raise HTTPException(400, "Invalid code")
     return response_from_set(token_set)
 
 
-@auth_router.post("/refresh/roll")
+@auth_router.get("/refresh/roll")
 async def refresh(
     refresh_token: Annotated[str, Cookie()],
     auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
@@ -75,17 +75,18 @@ async def refresh(
         token_set = await auth_service.refresh(refresh_token)
     except AbstractAuthService.InvalidRefreshToken:
         raise HTTPException(
-            403,
+            401,
             "Invalid refresh token",
-            headers=refresh_token_cookie(refresh_token, -1),
         )
     return response_from_set(token_set)
 
 
-@auth_router.post("/refresh/logout")
+@auth_router.get("/refresh/logout")
 async def logout(
     refresh_token: Annotated[str, Cookie()],
     auth_service: Annotated[AbstractAuthService, Depends(get_auth_service)],
 ) -> Response:
     await auth_service.logout(refresh_token)
-    return JSONResponse({"logout": 1}, headers=refresh_token_cookie(refresh_token, -1))
+    response = JSONResponse({"logout": 1})
+    response_with_refresh(response, refresh_token, -1)
+    return response

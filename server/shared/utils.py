@@ -1,3 +1,4 @@
+from datetime import datetime, UTC
 from bcrypt import hashpw, checkpw, gensalt
 
 
@@ -7,3 +8,7 @@ def hash_password(original: str) -> str:
 
 def validate_password(hashed: str, orignal: str) -> bool:
     return checkpw(orignal.encode(), hashed.encode())
+
+
+def datetime_now() -> datetime:
+    return datetime.now(UTC)

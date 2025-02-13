@@ -1,4 +1,5 @@
-from typing import Annotated, Dict
+from typing import Annotated
+from fastapi import Response
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
 from email_validator import validate_email as validate_email_raw
@@ -59,21 +60,24 @@ class VerifyRequest(BaseModel):
     code: VerificationCode
 
 
-def refresh_token_cookie(value: str, max_age: int) -> Dict[str, str]:
-    return {
-        "Set-Cookie": f"refresh_token={value}; max-age={max_age}; path=/auth/refresh"
-    }
+def response_with_refresh(response: Response, value: str, max_age: int) -> None:
+    response.set_cookie(
+        key="refresh_token",
+        value=value,
+        max_age=max_age,
+        path="/auth/refresh",
+        secure=True,
+        httponly=True,
+    )
 
 
 def response_from_set(value: AccessTokenSet | RefreshTokenSet) -> JSONResponse:
-    return JSONResponse(
+    response = JSONResponse(
         {
             "access_token": value.access_token,
             "expires_in": value.access_token_expires_in,
         },
-        headers=refresh_token_cookie(
-            value.refresh_token, value.refresh_token_expires_in
-        )
-        if isinstance(value, RefreshTokenSet)
-        else None,
     )
+    if isinstance(value, RefreshTokenSet):
+        response_with_refresh(response, value.refresh_token, value.refresh_token_expires_in)
+    return response

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import List
 
 from api.services.jwt.models import JwtRoles
@@ -8,7 +8,7 @@ from shared.entities.email_verification.repo import ABCEmailVerificationReposito
 from shared.entities.refresh_token.repo import ABCRefreshTokenRepository
 from shared.entities.user.repo import ABCUserRepository
 from shared.settings import Settings
-from shared.utils import validate_password
+from shared.utils import datetime_now, validate_password
 from .models import AccessTokenSet, RefreshTokenSet
 
 
@@ -123,10 +123,10 @@ class DefaultAuthService(AbstractAuthService):
         token = await self.refresh_token_repo.find(refresh_token)
         if token is None:
             raise AbstractAuthService.InvalidRefreshToken
+        await self.refresh_token_repo.delete(str(token.id))
         if (
             token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
-        ) < datetime.now():
-            await self.refresh_token_repo.delete(str(token.id))
+        ) < datetime_now():
             raise AbstractAuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id, [JwtRoles.API])
 

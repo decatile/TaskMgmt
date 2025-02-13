@@ -4,5 +4,5 @@ const USER_ENDPOINTS = {
 };
 
 export const getCurrentUser = () => {
-  return api.post(USER_ENDPOINTS.GET_CURRENT_USER);
+  return api.get(USER_ENDPOINTS.GET_CURRENT_USER);
 };

@@ -3,6 +3,7 @@ from celery import Celery
 from celery.schedules import crontab
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from shared.entities.refresh_token import DatabaseRefreshTokenRepository
+from shared.entities.email_verification import DatabaseEmailVerificationRepository
 from shared.settings import settings
 
 engine = create_async_engine(settings.database_url)
@@ -18,4 +19,5 @@ app.conf.beat_schedule = {
 @app.task
 async def task():
     async with AsyncSession(engine) as session, engine.begin():
-        await DatabaseRefreshTokenRepository(session, settings).delete_expired_tokens()
+        await DatabaseRefreshTokenRepository(session, settings).cleanup_expired()
+        await DatabaseEmailVerificationRepository(session, settings).cleanup_expired()

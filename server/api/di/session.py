@@ -13,5 +13,5 @@ async def get_session(
     global engine
     if engine is None:
         engine = create_async_engine(settings.database_url)
-    async with AsyncSession(engine) as session, session.begin():
-        yield session
+    async with AsyncSession(engine) as session, session.begin() as tx:
+        yield tx.session

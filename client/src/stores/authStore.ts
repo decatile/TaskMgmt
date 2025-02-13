@@ -8,21 +8,17 @@ class AuthStore {
 
   constructor() {
     makeAutoObservable(this);
-    this.refreshToken();
+    // this.refreshToken();
   }
 
   async register(email: string, username: string, password: string) {
-    this.status = 'loading';
-    this.error = null;
+    this.setLoading()
 
     try {
       const response = await AuthService.register(email, username, password);
-      console.log('res', response);
-      this.accessToken = response.data.access_token;
-      this.status = 'success';
+      this.setToken(response.data.access_token)
     } catch (err: any) {
-      this.status = 'failed';
-      this.error = err.message;
+      this.setError(err.message)
     }
   }
 
@@ -32,11 +28,9 @@ class AuthStore {
 
     try {
       const response = await AuthService.login(email, password);
-      this.accessToken = response.data.access_token;
-      this.status = 'success';
+      this.setToken(response.data.access_token)
     } catch (err: any) {
-      this.status = 'failed';
-      this.error = err.message;
+      this.setError(err.message)
     }
   }
 
@@ -45,16 +39,29 @@ class AuthStore {
     this.error = null;
     try {
       const response = await AuthService.refreshToken();
-      this.accessToken = response.data.access_token;
-      this.status = 'success';
+      this.setToken(response.data.access_token)
     } catch (err: any) {
-      this.status = 'failed';
-      this.error = err.message;
+      this.setError(err.message)
     }
   }
 
   async logout() {
-    this.accessToken = null;
+    this.setToken(null)
+  }
+
+  private setLoading() {
+    this.status = 'loading'
+    this.error = null
+  }
+
+  private setToken(token: string | null) {
+    this.accessToken = token
+    this.status = 'success'
+  }
+
+  private setError(error: string) {
+    this.error = error
+    this.status = 'failed'
   }
 }
 
