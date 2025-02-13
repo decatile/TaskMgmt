@@ -4,8 +4,9 @@ from celery.schedules import crontab
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from shared.entities.refresh_token import RefreshTokenRepository
 from shared.entities.email_verification import EmailVerificationRepository
-from shared.settings import settings
+from shared.settings import Settings
 
+settings = Settings()
 engine = create_async_engine(settings.database_url)
 app = Celery("cleanup_refresh_tokens", broker=settings.redis_url)
 app.conf.beat_schedule = {
