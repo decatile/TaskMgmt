@@ -1,6 +1,6 @@
 import api from './api';
 
-export const ENDPOINTS = {
+const ENDPOINTS = {
   REGISTER: '/auth/register',
   LOGIN: '/auth/login',
   REFRESH_TOKEN: '/auth/refresh/roll',
