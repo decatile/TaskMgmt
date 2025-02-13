@@ -1,8 +1,9 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dataclasses import dataclass
-from api.services.jwt.models import JwtRoles
+from api.services.jwt.models import JwtScope
+from api.dto.base import DetailedHTTPException
 from shared.entities.user import User
 from shared.entities.user import ABCUserRepository
 from api.di.jwt_service import get_jwt_service
@@ -24,13 +25,15 @@ async def get_current_email_verification_user(
     user_repo: Annotated[ABCUserRepository, Depends(get_user_repo)],
 ) -> UserWithEmailVerify:
     if credentials is None:
-        raise HTTPException(401, "No access token passed")
+        raise DetailedHTTPException("access_token_not_present")
     obj = jwt_service.from_string(credentials.credentials)
     if obj is None:
-        raise HTTPException(401, "Invalid access token")
-    if JwtRoles.EMAIL_VERIFICATION not in obj.roles:
-        raise HTTPException(403, "Access token not allowed to verify email")
+        raise DetailedHTTPException("access_token_invalid")
+    if JwtScope.EMAIL_VERIFICATION != obj.scope:
+        raise DetailedHTTPException(
+            "access_token_forbidden", resource="EMAIL_VERIFICATION"
+        )
     user = await user_repo.find(obj.user_id)
     if user is None:
-        raise HTTPException(401, "User associated with access token not found")
+        raise DetailedHTTPException("access_token_poisoned")
     return UserWithEmailVerify(user=user, email_verify_id=int(str(obj.email_verify)))

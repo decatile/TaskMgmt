@@ -1,4 +1,4 @@
 from .service import AbstractJwtService, DefaultJwtService
-from .models import JwtObject, JwtRoles
+from .models import JwtObject, JwtScope
 
-__all__ = ("AbstractJwtService", "DefaultJwtService", "JwtObject", "JwtRoles")
+__all__ = ("AbstractJwtService", "DefaultJwtService", "JwtObject", "JwtScope")

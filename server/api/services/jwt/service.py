@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List
 from shared.settings import Settings
 from .models import JwtObject
 import jwt
@@ -9,7 +8,7 @@ import jwt
 class AbstractJwtService(ABC):
     @abstractmethod
     def new(
-        self, user_id: int, roles: List[str], email_verification_id: int | None = None
+        self, user_id: int, scope: str, email_verification_id: int | None = None
     ) -> str: ...
 
     @abstractmethod
@@ -22,14 +21,14 @@ class DefaultJwtService(AbstractJwtService):
         self.settings = settings
 
     def new(
-        self, user_id: int, roles: List[str], email_verification_id: int | None = None
+        self, user_id: int, scope: str, email_verification_id: int | None = None
     ) -> str:
         now = int(datetime.now().timestamp())
         obj = {
             "sub": str(user_id),
             "iat": now,
             "exp": now + self.settings.access_token_expires_in,
-            "roles": roles,
+            "scope": scope,
         }
         if email_verification_id is not None:
             obj["email_verify"] = email_verification_id
@@ -49,7 +48,7 @@ class DefaultJwtService(AbstractJwtService):
             )
             return JwtObject(
                 user_id=int(obj["sub"]),
-                roles=obj["roles"],
+                scope=obj["scope"],
                 email_verify=obj.get("email_verify"),
             )
         except:  # noqa: E722[]

@@ -76,8 +76,11 @@ def response_from_set(value: AccessTokenSet | RefreshTokenSet) -> JSONResponse:
         {
             "access_token": value.access_token,
             "expires_in": value.access_token_expires_in,
-        },
+            "scope": value.scope
+        }
     )
     if isinstance(value, RefreshTokenSet):
-        response_with_refresh(response, value.refresh_token, value.refresh_token_expires_in)
+        response_with_refresh(
+            response, value.refresh_token, value.refresh_token_expires_in
+        )
     return response

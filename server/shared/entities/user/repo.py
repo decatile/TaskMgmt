@@ -9,6 +9,9 @@ from shared.entities.user import User
 
 class ABCUserRepository(ABCRepository[User, int]):
     @abstractmethod
+    async def find_enabled(self, key: int) -> User | None: ...
+
+    @abstractmethod
     async def find_by_email(self, email: str) -> User | None: ...
 
     @abstractmethod
@@ -26,6 +29,11 @@ class ABCUserRepository(ABCRepository[User, int]):
 class DatabaseUserRepository(Repository[User, int], ABCUserRepository):
     def __init__(self, session: AsyncSession):
         super().__init__(User, session)
+
+    async def find_enabled(self, key: int) -> User | None:
+        return await self._session.scalar(
+            select(User).where((User.id == key) & User.enabled)
+        )
 
     async def find_by_email(self, email: str) -> User | None:
         return await self._session.scalar(select(User).where(User.email == email))

@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
 class JwtObject:
     user_id: int
-    roles: List[str]
+    scope: str
     email_verify: int | None
 
 
-class JwtRoles:
+class JwtScope:
     API: ClassVar = "api"
     EMAIL_VERIFICATION: ClassVar = "email_verification"
