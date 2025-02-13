@@ -8,6 +8,7 @@ class AuthStore {
 
   constructor() {
     makeAutoObservable(this);
+    this.refreshToken();
   }
 
   async register(email: string, username: string, password: string) {
