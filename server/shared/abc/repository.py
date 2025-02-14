@@ -3,14 +3,12 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from .entity import Entity
 
+
 class Repository[TEntity: Entity, TId]:
     def __init__(self, entity_type: Type[TEntity], session: AsyncSession):
         super().__init__()
         self._session = session
         self._type = entity_type
-
-    def get_class(self) -> Type[TEntity]:
-        return self._type
 
     async def find(self, key: TId) -> TEntity | None:
         return await self._session.get(self._type, key)

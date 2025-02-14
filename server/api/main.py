@@ -21,10 +21,10 @@ app = FastAPI(
         401 "access_token_not_present"
     If access token parsing and verifying failed:
         401 "access_token_invalid"
-    If access token hasn't access to API resource:
+    If access token hasn't access to email verification resource:
         403 "access_token_forbidden", resource: "EMAIL_VERIFICATION"
     If access token user doesn't exist:
-        401 "access_token_poisoned"""
+        401 "access_token_poisoned\""""
 )
 app.add_middleware(
     CORSMiddleware,
