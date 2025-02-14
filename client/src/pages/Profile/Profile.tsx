@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { getCurrentUser } from '../../services/UserService';
 import authStore from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
-import { reaction } from 'mobx';
 
 const Profile = () => {
   const [user, setUser] = useState({} as any);

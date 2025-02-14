@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react';
 import authStore from '../../stores/authStore';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 
 const PrivateRoute = observer(() => {
   if (!authStore.getToken()) {

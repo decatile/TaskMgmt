@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(async config => {
+api.interceptors.request.use(async (config) => {
   const accessToken = authStore.getToken();
   if (accessToken) {
     config.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -19,8 +19,8 @@ api.interceptors.request.use(async config => {
 });
 
 api.interceptors.response.use(
-  response => response,
-  async err => {
+  (response) => response,
+  async (err) => {
     const originalRequest = err.config;
 
     if (err.response?.status === 401 && !originalRequest._retry) {
