@@ -1,0 +1,391 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "FastAPI",
+        "description": "\n    Every authorized request firstly goes through token validation. Possible errors:\n    If access token not present:\n        401 \"access_token_not_present\"\n    If access token parsing and verifying failed:\n        401 \"access_token_invalid\"\n    If access token hasn't access to API resource:\n        403 \"access_token_forbidden\", resource: \"API\"\n    If access token user doesn't exist:\n        401 \"access_token_poisoned\"\n    \n    Email verification request is a special. We use a token for identifying user that requests a verification. Possible errors:\n    If access token not present:\n        401 \"access_token_not_present\"\n    If access token parsing and verifying failed:\n        401 \"access_token_invalid\"\n    If access token hasn't access to email verification resource:\n        403 \"access_token_forbidden\", resource: \"EMAIL_VERIFICATION\"\n    If access token user doesn't exist:\n        401 \"access_token_poisoned\"",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "summary": "Login",
+                "description": "Retrieve token set using email and password.\n    \n    Possible errors:\n    If user not found:\n        400 \"user_not_found\"\n    If password is invalid:\n        400 \"invalid_password\"",
+                "operationId": "login_auth_login_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessTokenSet"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "summary": "Register",
+                "description": "Register user by username, email and password. If email authentication enabled, returns a special access token for verification.\n    \n    Possible errors:\n    If user already exist:\n        400 \"user_already_exist\", cause: \"email\" | \"username\"",
+                "operationId": "register_auth_register_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessTokenSet"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify": {
+            "post": {
+                "summary": "Verify",
+                "description": "Verify email by special access token and code\n    \n    Possible errors:\n    If code is invalid:\n        401 \"invalid_code\"",
+                "operationId": "verify_auth_verify_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessTokenSet"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
+        "/auth/refresh/roll": {
+            "get": {
+                "summary": "Refresh",
+                "description": "Rotate new refresh token\n    \n    Possible errors:\n    If refresh token is invalid:\n        401 \"refresh_token_invalid\"",
+                "operationId": "refresh_auth_refresh_roll_get",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "cookie",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Refresh Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessTokenSet"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh/logout": {
+            "get": {
+                "summary": "Logout",
+                "description": "Logout by refresh token, returns empty string",
+                "operationId": "logout_auth_refresh_logout_get",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "cookie",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Refresh Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/me": {
+            "get": {
+                "summary": "Me",
+                "description": "Returns a user profile",
+                "operationId": "me_profile_me_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProfileResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AccessTokenSet": {
+                "properties": {
+                    "scope": {
+                        "type": "string",
+                        "title": "Scope"
+                    },
+                    "access_token": {
+                        "type": "string",
+                        "title": "Access Token"
+                    },
+                    "access_token_expires_in": {
+                        "type": "integer",
+                        "title": "Access Token Expires In"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "scope",
+                    "access_token",
+                    "access_token_expires_in"
+                ],
+                "title": "AccessTokenSet"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "LoginRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "title": "Email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "LoginRequest"
+            },
+            "ProfileResponse": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "title": "Email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "registered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Registered At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "username",
+                    "registered_at"
+                ],
+                "title": "ProfileResponse"
+            },
+            "RegisterRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "title": "Email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "username",
+                    "password"
+                ],
+                "title": "RegisterRequest"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "VerifyRequest": {
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "title": "Code"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "title": "VerifyRequest"
+            }
+        },
+        "securitySchemes": {
+            "HTTPBearer": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}
