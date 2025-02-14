@@ -2,7 +2,6 @@ import { makeAutoObservable } from 'mobx';
 import * as AuthService from '../services/AuthService';
 
 class AuthStore {
-  accessToken: string | null = null;
   status: 'idle' | 'loading' | 'success' | 'failed' = 'idle';
   error: string | null = null;
 
@@ -39,7 +38,7 @@ class AuthStore {
     try {
       const response = await AuthService.refreshToken();
       this.setToken(response.data.access_token);
-      console.log('New access token:', this.accessToken);
+      console.log('New access token:', localStorage.getItem('token'));
     } catch (err: any) {
       this.setError(err.message);
     }
@@ -50,13 +49,22 @@ class AuthStore {
     await AuthService.logout();
   }
 
+  getToken() {
+    return localStorage.getItem('token');
+  }
+
   private setLoading() {
     this.error = null;
     this.status = 'loading';
   }
 
   private setToken(token: string | null) {
-    this.accessToken = token;
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+
     this.status = 'success';
   }
 

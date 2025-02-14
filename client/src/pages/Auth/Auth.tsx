@@ -23,6 +23,7 @@ const Auth = observer(() => {
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            min={6}
             placeholder="Email"
           />
         </div>
@@ -32,6 +33,7 @@ const Auth = observer(() => {
             type="text"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            min={8}
             placeholder="Password"
           />
         </div>

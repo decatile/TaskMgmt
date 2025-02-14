@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { getCurrentUser } from '../../services/UserService';
 import authStore from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import { reaction } from 'mobx';
 
 const Profile = () => {
   const [user, setUser] = useState({} as any);
   const navigate = useNavigate();
   useEffect(() => {
     const getUser = async () => {
-      console.log('token', authStore.accessToken);
+      console.log('token', authStore.getToken());
 
       const response = await getCurrentUser();
       console.log('profile', response.data);

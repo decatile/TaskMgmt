@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async config => {
-  const accessToken = authStore.accessToken;
+  const accessToken = authStore.getToken();
   if (accessToken) {
     config.headers['Authorization'] = `Bearer ${accessToken}`;
   }
@@ -28,7 +28,7 @@ api.interceptors.response.use(
 
       try {
         await authStore.refreshToken();
-        const newAccessToken = authStore.accessToken;
+        const newAccessToken = authStore.getToken();
 
         if (newAccessToken) {
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
