@@ -1,15 +1,18 @@
 import { observer } from 'mobx-react';
 import { useState } from 'react';
 import authStore from '../../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const Register = observer(() => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await authStore.register(email, username, password);
+    navigate('/profile')
   };
 
   return (

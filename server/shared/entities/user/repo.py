@@ -38,7 +38,7 @@ class UserRepository(Repository[User, int]):
             enabled=enabled,
         )
 
-    async def enable(self, user_id) -> None:
+    async def enable(self, user_id: int) -> None:
         await self._session.execute(
             update(User).where(User.id == user_id).values(enabled=True)
         )
