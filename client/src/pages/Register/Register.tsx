@@ -23,7 +23,7 @@ const Register = observer(() => {
           <input
             type="text"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
           />
         </div>
@@ -32,7 +32,7 @@ const Register = observer(() => {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
           />
         </div>
@@ -41,7 +41,7 @@ const Register = observer(() => {
           <input
             type="text"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
           />
         </div>

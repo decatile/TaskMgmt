@@ -16,8 +16,10 @@ class AuthStore {
     try {
       const response = await AuthService.register(email, username, password);
       this.setToken(response.data.access_token);
-    } catch (err: any) {
-      this.setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        this.setError(err.message);
+      }
     }
   }
 
@@ -27,8 +29,12 @@ class AuthStore {
     try {
       const response = await AuthService.login(email, password);
       this.setToken(response.data.access_token);
-    } catch (err: any) {
-      this.setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log('Login error:', err);
+
+        this.setError(err.message);
+      }
     }
   }
 
@@ -39,8 +45,10 @@ class AuthStore {
       const response = await AuthService.refreshToken();
       this.setToken(response.data.access_token);
       console.log('New access token:', localStorage.getItem('token'));
-    } catch (err: any) {
-      this.setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        this.setError(err.message);
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import authStore from '../../stores/authStore';
 import { Navigate, Outlet } from 'react-router-dom';
 

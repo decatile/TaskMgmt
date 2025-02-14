@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 import Auth from './pages/Auth/Auth';
 import Register from './pages/Register/Register';
 import Profile from './pages/Profile/Profile';
