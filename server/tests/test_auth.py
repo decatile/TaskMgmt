@@ -2,7 +2,7 @@ from datetime import timedelta
 from api.services.auth.service import AuthService
 from shared.entities.email_verification.model import EmailVerification
 from shared.entities.refresh_token.model import RefreshToken
-from shared.utils import datetime_now, hash_password
+from shared.utils import utc_now, hash_password
 from shared.entities.user.model import User
 from shared.settings import Settings
 from shared.entities.user import UserRepository
@@ -49,7 +49,7 @@ async def test_auth(mocker: MockFixture):
 
     # Refresh token expired
     token_repo.find.return_value = RefreshToken(
-        created_at=datetime_now() - timedelta(days=365)
+        created_at=utc_now() - timedelta(days=365)
     )
     settings.refresh_token_expires_in = 0
     with pytest.raises(AuthService.InvalidRefreshToken):

@@ -1,4 +1,3 @@
-# type: ignore
 from datetime import timedelta
 from celery import Celery
 from celery.schedules import crontab
@@ -12,13 +11,13 @@ import asyncio
 
 log = getLogger(__name__)
 
-settings = Settings()
+settings = Settings()  # type: ignore
 engine = create_async_engine(settings.database_url)
 app = Celery("cleanup_refresh_tokens", broker=settings.redis_url)
 app.conf.beat_schedule = {
     "cleanup-refresh-tokens": {
         "task": "worker.cleanup_refresh_tokens.task",
-        "schedule": crontab(minute=0, hour="*/1"),
+        "schedule": crontab(hour="*/1"),
     }
 }
 

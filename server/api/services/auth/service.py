@@ -5,7 +5,7 @@ from shared.entities.email_verification import EmailVerificationRepository
 from shared.entities.refresh_token import RefreshTokenRepository
 from shared.entities.user.repo import UserRepository
 from shared.settings import Settings
-from shared.utils import datetime_now, validate_password
+from shared.utils import utc_now, validate_password
 from .models import AccessTokenSet, RefreshTokenSet
 
 
@@ -101,7 +101,7 @@ class AuthService:
         await self.refresh_token_repo.delete(str(token.id))
         if (
             token.created_at + timedelta(seconds=self.settings.refresh_token_expires_in)
-        ) < datetime_now():
+        ) < utc_now():
             raise AuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id)
 
