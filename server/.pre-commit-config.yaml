@@ -15,10 +15,12 @@ repos:
     - id: docs
       name: Generate docs/openapi.json
       entry: poetry run python docs.py --output docs/openapi.json
+      files: .py$
       language: system
       pass_filenames: false
     - id: docs-add
       name: Add docs/openapi.json to index
       entry: git add docs/openapi.json
+      files: .py$
       language: system
       pass_filenames: false

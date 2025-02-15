@@ -5,5 +5,4 @@ __pycache__
 .ruff_cache
 .vscode
 .pytest_cache
-.venv
 .coverage
