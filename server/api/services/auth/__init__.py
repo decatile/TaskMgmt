@@ -1,8 +1,7 @@
 from .service import AuthService
-from .models import AccessTokenSet, RefreshTokenSet
+from .models import TokenSet
 
 __all__ = (
     "AuthService",
-    "AccessTokenSet",
-    "RefreshTokenSet",
+    "TokenSet",
 )

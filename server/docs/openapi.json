@@ -48,52 +48,13 @@
         "/auth/register": {
             "post": {
                 "summary": "Register",
-                "description": "Register user by username, email and password. If email authentication enabled, returns a special access token for verification.\n    \n    Possible errors:\n    If user already exist:\n        400 \"user_already_exist\", cause: \"email\" | \"username\"",
+                "description": "Register user by username, email and password.\n        \n        Possible errors:\n        If user already exist:\n            400 \"user_already_exist\", cause: \"email\" | \"username\"",
                 "operationId": "register_auth_register_post",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/RegisterRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/TokenResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/verify": {
-            "post": {
-                "summary": "Verify",
-                "description": "Verify email by special access token and code\n    \n    Possible errors:\n    If request_id is invalid\n        400 \"invalid_request_id\"\n    If code is invalid:\n        401 \"invalid_code\"",
-                "operationId": "verify_auth_verify_post",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/VerifyRequest"
                             }
                         }
                     },
@@ -356,24 +317,6 @@
                     "type"
                 ],
                 "title": "ValidationError"
-            },
-            "VerifyRequest": {
-                "properties": {
-                    "request_id": {
-                        "type": "string",
-                        "title": "Request Id"
-                    },
-                    "code": {
-                        "type": "string",
-                        "title": "Code"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "request_id",
-                    "code"
-                ],
-                "title": "VerifyRequest"
             }
         },
         "securitySchemes": {

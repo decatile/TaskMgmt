@@ -8,6 +8,5 @@ class Settings(BaseSettings):
     access_token_secret_key: str
     access_token_expires_in: int
     refresh_token_expires_in: int
-    email_verification_enable: bool
     email_verification_code_expires_in: int
 

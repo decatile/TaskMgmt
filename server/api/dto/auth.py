@@ -3,7 +3,7 @@ from fastapi import Response
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel
 from email_validator import validate_email as validate_email_raw
-from api.services.auth import AccessTokenSet, RefreshTokenSet
+from api.services.auth import TokenSet
 import re
 
 
@@ -77,15 +77,12 @@ def response_with_refresh(response: Response, value: str, max_age: int) -> None:
     )
 
 
-def response_from_set(value: AccessTokenSet | RefreshTokenSet) -> JSONResponse:
+def response_from_set(value: TokenSet) -> JSONResponse:
     response = JSONResponse(
         {
             "access_token": value.access_token,
             "expires_in": value.access_token_expires_in,
         }
     )
-    if isinstance(value, RefreshTokenSet):
-        response_with_refresh(
-            response, value.refresh_token, value.refresh_token_expires_in
-        )
+    response_with_refresh(response, value.refresh_token, value.refresh_token_expires_in)
     return response

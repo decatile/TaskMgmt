@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, cast
 from fastapi import APIRouter, Cookie, Depends, Response
 from fastapi.responses import JSONResponse
 from api.di.auth_service import get_auth_service
@@ -10,8 +10,10 @@ from api.dto.auth import (
     response_from_set,
     response_with_refresh,
 )
-from api.services.auth import AuthService
+from api.services.auth import AuthService, TokenSet
 from api.dto.base import DetailedHTTPException
+from api.main import get_runtime_settings
+from api.services.auth.models import VerificationRequestId
 
 
 auth_router = APIRouter()
@@ -42,56 +44,85 @@ async def login(
     return response_from_set(token_set)
 
 
-@auth_router.post(
-    "/register",
-    response_model=TokenResponse,
-    description='''
-    Register user by username, email and password. If email authentication enabled, returns a special access token for verification.
-    
-    Possible errors:
-    If user already exist:
-        400 "user_already_exist", cause: "email" | "username"''',
-)
-async def register(
-    form: RegisterRequest,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
-) -> JSONResponse:
-    try:
-        token_set = await auth_service.register(
-            form.email, form.username, form.password
-        )
-    except AuthService.EmailExists:
-        raise DetailedHTTPException("user_already_exist", cause="email")
-    except AuthService.UsernameExists:
-        raise DetailedHTTPException("user_already_exist", cause="username")
-    return response_from_set(token_set)
+if get_runtime_settings().email_verification_enabled:
+
+    @auth_router.post(
+        "/register",
+        description='''
+        Register user by username, email and password. Returns a request_id for verification.
+        
+        Possible errors:
+        If user already exist:
+            400 "user_already_exist", cause: "email" | "username"''',
+    )
+    async def register(  # type: ignore
+        form: RegisterRequest,
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+    ) -> VerificationRequestId:
+        try:
+            r = cast(
+                VerificationRequestId,
+                await auth_service.register(form.email, form.username, form.password),
+            )
+        except AuthService.EmailExists:
+            raise DetailedHTTPException("user_already_exist", cause="email")
+        except AuthService.UsernameExists:
+            raise DetailedHTTPException("user_already_exist", cause="username")
+        return r
+
+    @auth_router.post(
+        "/verify",
+        response_model=TokenResponse,
+        description='''
+        Verify email by special access token and code
+        
+        Possible errors:
+        If request_id is invalid
+            400 "invalid_request_id"
+        If code is invalid:
+            401 "invalid_code"''',
+    )
+    async def verify(
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        request: VerifyRequest,
+    ):
+        try:
+            token_set = await auth_service.verify(
+                request_id=request.request_id, code=request.code
+            )
+        except AuthService.InvalidRequestId:
+            raise DetailedHTTPException("invalid_request_id")
+        except AuthService.InvalidCode:
+            raise DetailedHTTPException("invalid_code")
+        return response_from_set(token_set)
 
 
-@auth_router.post(
-    "/verify",
-    response_model=TokenResponse,
-    description='''
-    Verify email by special access token and code
-    
-    Possible errors:
-    If request_id is invalid
-        400 "invalid_request_id"
-    If code is invalid:
-        401 "invalid_code"''',
-)
-async def verify(
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
-    request: VerifyRequest,
-):
-    try:
-        token_set = await auth_service.verify(
-            request_id=request.request_id, code=request.code
-        )
-    except AuthService.InvalidRequestId:
-        raise DetailedHTTPException("invalid_request_id")
-    except AuthService.InvalidCode:
-        raise DetailedHTTPException("invalid_code")
-    return response_from_set(token_set)
+else:
+
+    @auth_router.post(
+        "/register",
+        response_model=TokenResponse,
+        description='''
+        Register user by username, email and password.
+        
+        Possible errors:
+        If user already exist:
+            400 "user_already_exist", cause: "email" | "username"''',
+    )
+    async def register(
+        form: RegisterRequest,
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+    ):
+        try:
+            r = cast(
+                TokenSet,
+                await auth_service.register(form.email, form.username, form.password),
+            )
+        except AuthService.EmailExists:
+            raise DetailedHTTPException("user_already_exist", cause="email")
+        except AuthService.UsernameExists:
+            raise DetailedHTTPException("user_already_exist", cause="username")
+        return response_from_set(r)
 
 
 @auth_router.get(
