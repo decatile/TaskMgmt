@@ -57,10 +57,10 @@ async def test_auth(mocker: MockFixture):
 
     # Invalid verify
     email_repo.find.return_value = None
-    with pytest.raises(AuthService.InvalidVerifyId):
-        await service.verify(1, 1, "")
+    with pytest.raises(AuthService.InvalidRequestId):
+        await service.verify("1", "1")
 
     # Invalid code
     email_repo.find.return_value = EmailVerification(code="")
     with pytest.raises(AuthService.InvalidCode):
-        await service.verify(1, 1, '1')
+        await service.verify("1", "1")

@@ -9,8 +9,9 @@ ErrorCode = Literal[
     "user_not_found",
     "user_already_exist",
     "invalid_password",
+    "invalid_request_id",
     "invalid_code",
-    "refresh_token_invalid"
+    "refresh_token_invalid",
 ]
 
 error_code_to_status: Dict[ErrorCode, int] = {
@@ -21,8 +22,9 @@ error_code_to_status: Dict[ErrorCode, int] = {
     "user_not_found": 400,
     "user_already_exist": 400,
     "invalid_password": 400,
+    "invalid_request_id": 400,
     "invalid_code": 401,
-    "refresh_token_invalid": 401
+    "refresh_token_invalid": 401,
 }
 
 

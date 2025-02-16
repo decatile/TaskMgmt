@@ -1,5 +1,4 @@
 from datetime import timedelta
-from api.services.jwt import JwtScope
 from api.services.jwt import JwtService
 from shared.entities.email_verification import EmailVerificationRepository
 from shared.entities.refresh_token import RefreshTokenRepository
@@ -20,7 +19,7 @@ class AuthService:
 
     class InvalidRefreshToken(Exception): ...
 
-    class InvalidVerifyId(Exception): ...
+    class InvalidRequestId(Exception): ...
 
     class InvalidCode(Exception): ...
 
@@ -40,27 +39,24 @@ class AuthService:
         self.settings = settings
 
     def _generate_jwt_set_email(self, user_id: int, email_verify: int):
-        jwt = self.jwt_service.new(user_id, JwtScope.EMAIL_VERIFICATION, email_verify)
+        jwt = self.jwt_service.new(user_id)
         return AccessTokenSet(
-            scope=JwtScope.EMAIL_VERIFICATION,
             access_token=jwt,
             access_token_expires_in=self.settings.access_token_expires_in,
         )
 
     def _generate_jwt_set(self, user_id: int) -> AccessTokenSet:
-        jwt = self.jwt_service.new(user_id, JwtScope.API)
+        jwt = self.jwt_service.new(user_id)
         return AccessTokenSet(
-            scope=JwtScope.API,
             access_token=jwt,
             access_token_expires_in=self.settings.access_token_expires_in,
         )
 
     async def _generate_complete_jwt_set(self, user_id: int) -> RefreshTokenSet:
-        jwt = self.jwt_service.new(user_id, JwtScope.API)
+        jwt = self.jwt_service.new(user_id)
         refresh = self.refresh_token_repo.new(user_id)
         await self.refresh_token_repo.save(refresh)
         return RefreshTokenSet(
-            scope=JwtScope.API,
             access_token=jwt,
             refresh_token=str(refresh.id),
             access_token_expires_in=self.settings.access_token_expires_in,
@@ -105,16 +101,15 @@ class AuthService:
             raise AuthService.InvalidRefreshToken
         return await self._generate_complete_jwt_set(token.user_id)
 
-    async def verify(
-        self, user_id: int, email_verify_id: int, code: str
-    ) -> RefreshTokenSet:
-        verify = await self.email_verification_repo.find(email_verify_id)
+    async def verify(self, request_id: str, code: str) -> RefreshTokenSet:
+        verify = await self.email_verification_repo.find(request_id)
         if verify is None:
-            raise AuthService.InvalidVerifyId
+            raise AuthService.InvalidRequestId
         if verify.code != code:
             raise AuthService.InvalidCode
-        await self.user_repo.enable(user_id)
-        return await self._generate_complete_jwt_set(user_id)
+        await self.email_verification_repo.delete(request_id)
+        await self.user_repo.enable(verify.user_id)
+        return await self._generate_complete_jwt_set(verify.user_id)
 
     async def logout(self, refresh_token_id: str) -> None:
         await self.refresh_token_repo.delete(refresh_token_id)

@@ -57,7 +57,13 @@ class RegisterRequest(BaseModel):
 
 
 class VerifyRequest(BaseModel):
+    request_id: str
     code: VerificationCode
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    expires_in: int
 
 
 def response_with_refresh(response: Response, value: str, max_age: int) -> None:
@@ -76,7 +82,6 @@ def response_from_set(value: AccessTokenSet | RefreshTokenSet) -> JSONResponse:
         {
             "access_token": value.access_token,
             "expires_in": value.access_token_expires_in,
-            "scope": value.scope
         }
     )
     if isinstance(value, RefreshTokenSet):

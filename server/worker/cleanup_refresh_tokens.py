@@ -17,7 +17,7 @@ app = Celery("cleanup_refresh_tokens", broker=settings.redis_url)
 app.conf.beat_schedule = {
     "cleanup-refresh-tokens": {
         "task": "worker.cleanup_refresh_tokens.task",
-        "schedule": crontab(hour="*/1"),
+        "schedule": crontab(minute="0", hour="*/1"),
     }
 }
 

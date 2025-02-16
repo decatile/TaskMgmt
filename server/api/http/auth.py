@@ -5,17 +5,13 @@ from api.di.auth_service import get_auth_service
 from api.dto.auth import (
     LoginRequest,
     RegisterRequest,
+    TokenResponse,
     VerifyRequest,
     response_from_set,
     response_with_refresh,
 )
 from api.services.auth import AuthService
-from api.di.current_email_verification_user import (
-    UserWithEmailVerify,
-    get_current_email_verification_user,
-)
 from api.dto.base import DetailedHTTPException
-from api.services.auth.models import AccessTokenSet
 
 
 auth_router = APIRouter()
@@ -23,7 +19,7 @@ auth_router = APIRouter()
 
 @auth_router.post(
     "/login",
-    response_model=AccessTokenSet,
+    response_model=TokenResponse,
     description='''
     Retrieve token set using email and password.
     
@@ -48,7 +44,7 @@ async def login(
 
 @auth_router.post(
     "/register",
-    response_model=AccessTokenSet,
+    response_model=TokenResponse,
     description='''
     Register user by username, email and password. If email authentication enabled, returns a special access token for verification.
     
@@ -73,25 +69,26 @@ async def register(
 
 @auth_router.post(
     "/verify",
-    response_model=AccessTokenSet,
+    response_model=TokenResponse,
     description='''
     Verify email by special access token and code
     
     Possible errors:
+    If request_id is invalid
+        400 "invalid_request_id"
     If code is invalid:
         401 "invalid_code"''',
 )
 async def verify(
-    creds: Annotated[UserWithEmailVerify, Depends(get_current_email_verification_user)],
     auth_service: Annotated[AuthService, Depends(get_auth_service)],
-    code: VerifyRequest,
+    request: VerifyRequest,
 ):
     try:
         token_set = await auth_service.verify(
-            creds.user.id, creds.email_verify_id, code=code.code
+            request_id=request.request_id, code=request.code
         )
-    except AuthService.InvalidVerifyId:
-        raise DetailedHTTPException("access_token_poisoned")
+    except AuthService.InvalidRequestId:
+        raise DetailedHTTPException("invalid_request_id")
     except AuthService.InvalidCode:
         raise DetailedHTTPException("invalid_code")
     return response_from_set(token_set)
@@ -99,7 +96,7 @@ async def verify(
 
 @auth_router.get(
     "/refresh/roll",
-    response_model=AccessTokenSet,
+    response_model=TokenResponse,
     description="""
     Rotate new refresh token
     

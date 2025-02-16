@@ -1,7 +1,6 @@
 from typing import Annotated
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from api.services.jwt.models import JwtScope
 from api.dto.base import DetailedHTTPException
 from shared.entities.user import User
 from shared.entities.user import UserRepository
@@ -22,8 +21,6 @@ async def get_current_user(
     obj = jwt_service.from_string(credentials.credentials)
     if obj is None:
         raise DetailedHTTPException("access_token_invalid")
-    if JwtScope.API != obj.scope:
-        raise DetailedHTTPException("access_token_forbidden", resource="API")
     user = await user_repo.find_enabled(obj.user_id)
     if user is None:
         raise DetailedHTTPException("access_token_poisoned")

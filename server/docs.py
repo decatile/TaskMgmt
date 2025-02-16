@@ -1,9 +1,12 @@
-from os import makedirs
+from os import makedirs, environ
 from pathlib import Path
 from sys import stdout
 from fastapi.openapi.utils import get_openapi
 from json import dump
 from argparse import ArgumentParser
+
+environ["GEN_DOCS"] = "1"
+
 from api.main import app
 
 docs = get_openapi(
