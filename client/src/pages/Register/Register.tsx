@@ -39,6 +39,7 @@ const Register = observer(() => {
       password: (value) => {
         const errors: string[] = [];
         if (value.length < 8) errors.push('Minimum 8 characters');
+        if (value.length > 64) errors.push('Maximum 64 characters');
         if (!/[a-zA-Z]/.test(value))
           errors.push('There must be at least one letter');
         if (!/[0-9]/.test(value))
@@ -110,7 +111,7 @@ const Register = observer(() => {
               withAsterisk
               size="md"
               key={form.key('password')}
-              description="Password should be at least 8 characters, at least one letter, one digit and one special character"
+              description="Password should be at least 8 characters and 64 at most, at least one letter, one digit and one special character"
             />
             <FormField
               label="Confirm password"

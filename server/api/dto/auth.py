@@ -16,20 +16,32 @@ def validate_email(value: str) -> str:
 
 
 def validate_username(value: str) -> str:
-    if len(value) > 64:
-        raise ValueError("username must not be longer than 64 characters")
-    if re.fullmatch(r"[a-z][a-z0-9_]*[a-z0-9]", value, re.I) is None:
+    if len(value) < 5:
+        raise ValueError("username should contain at least 5 characters")
+    if len(value) > 32:
+        raise ValueError("username should contain at most 32 characters")
+    if not re.fullmatch(r"[a-z0-8-]+", value):
         raise ValueError(
-            "username must to start with letter, then continue with letters, digits or underscores and end with letter or digit"
+            "username should contain only Latin letters, numbers and hyphens"
         )
+    if re.match(r"^-|-$", value):
+        raise ValueError("username shouldn't begin or end with hyphen")
+    if "--" in value:
+        raise ValueError("username shouldn't contain two hyphens in a row")
     return value
 
 
 def validate_password(value: str) -> str:
     if len(value) < 8:
-        raise ValueError("password must be longer than 7 characters")
+        raise ValueError("password should contain at least 8 characters")
     if len(value) > 64:
-        raise ValueError("password must be shorter than 65 characters")
+        raise ValueError("password should contain at most 64 characters")
+    if not any(1 for i in value if i.isalpha()):
+        raise ValueError("password should contain at least one letter")
+    if not any(1 for i in value if i.isdigit()):
+        raise ValueError("password should contain at least one digit")
+    if " " in value:
+        raise ValueError("password should not contain space")
     return value
 
 
