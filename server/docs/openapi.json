@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "FastAPI",
-        "description": "\n    Every authorized request firstly goes through token validation. Possible errors:\n    If access token not present:\n        401 \"access_token_not_present\"\n    If access token parsing and verifying failed:\n        401 \"access_token_invalid\"\n    If access token hasn't access to API resource:\n        403 \"access_token_forbidden\", resource: \"API\"\n    If access token user doesn't exist:\n        401 \"access_token_poisoned\"\n    \n    Email verification request is a special. We use a token for identifying user that requests a verification. Possible errors:\n    If access token not present:\n        401 \"access_token_not_present\"\n    If access token parsing and verifying failed:\n        401 \"access_token_invalid\"\n    If access token hasn't access to email verification resource:\n        403 \"access_token_forbidden\", resource: \"EMAIL_VERIFICATION\"\n    If access token user doesn't exist:\n        401 \"access_token_poisoned\"",
+        "description": "\n    Every authorized request firstly goes through token validation. Possible errors:\n    If access token not present:\n        401 \"access_token_not_present\"\n    If access token parsing and verifying failed:\n        401 \"access_token_invalid\"\n    If access token hasn't access to API resource:\n        403 \"access_token_forbidden\", resource: \"API\"\n    If access token user doesn't exist:\n        401 \"access_token_poisoned\"",
         "version": "0.1.0"
     },
     "paths": {

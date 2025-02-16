@@ -16,16 +16,6 @@ app = FastAPI(
     If access token hasn't access to API resource:
         403 "access_token_forbidden", resource: "API"
     If access token user doesn't exist:
-        401 "access_token_poisoned"
-    
-    Email verification request is a special. We use a token for identifying user that requests a verification. Possible errors:
-    If access token not present:
-        401 "access_token_not_present"
-    If access token parsing and verifying failed:
-        401 "access_token_invalid"
-    If access token hasn't access to email verification resource:
-        403 "access_token_forbidden", resource: "EMAIL_VERIFICATION"
-    If access token user doesn't exist:
         401 "access_token_poisoned\"""",
 )
 
