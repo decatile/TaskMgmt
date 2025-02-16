@@ -20,7 +20,7 @@ def validate_username(value: str) -> str:
         raise ValueError("username should contain at least 5 characters")
     if len(value) > 32:
         raise ValueError("username should contain at most 32 characters")
-    if not re.fullmatch(r"[a-z0-8-]+", value):
+    if not re.fullmatch(r"[a-z0-8-]+", value, re.I):
         raise ValueError(
             "username should contain only Latin letters, numbers and hyphens"
         )
@@ -46,7 +46,7 @@ def validate_password(value: str) -> str:
 
 
 def validate_verification_code(value: str) -> str:
-    if (len(value) != 4) or not re.fullmatch(r"\d{4}", value):
+    if (len(value) != 4) or not all(1 for i in value if i.isdigit()):
         raise ValueError("invalid verification code")
     return value
 
